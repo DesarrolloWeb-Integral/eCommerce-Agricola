@@ -1,0 +1,42 @@
+{
+  "name": "app-agricola",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DesarrolloWeb-Integral/eCommerce-Agricola.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/DesarrolloWeb-Integral/eCommerce-Agricola/issues"
+  },
+  "homepage": "https://github.com/DesarrolloWeb-Integral/eCommerce-Agricola#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "prettier": "^3.8.3"
+  },
+  "lint-staged": {
+    "frontend-crm-agricola/**/*.{js,jsx,ts,tsx}": [
+      "npm --prefix frontend-crm-agricola run lint:fix",
+      "npm --prefix frontend-crm-agricola run format"
+    ],
+    "backend-crm-agricola/**/*.{js,jsx,ts,tsx}": [
+      "npm --prefix backend-crm-agricola run lint:fix",
+      "npm --prefix backend-crm-agricola run format"
+    ],
+    "**/*.{json,css,md}": [
+      "prettier --write"
+    ]
+  }
+}
