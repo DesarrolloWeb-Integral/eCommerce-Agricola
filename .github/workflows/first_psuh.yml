@@ -11,3 +11,4 @@ jobs:
         run: |
           echo "Hi my first Push"
           echo "My name is Gael Quintana Romero"
+          echo "id ${{github.event.head_commit.message}}"
