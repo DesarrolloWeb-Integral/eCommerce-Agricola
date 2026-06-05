@@ -9,6 +9,9 @@ jobs:
     steps:
       - name: Say Ayy
         run: |
-          echo "Hi my first Push"
-          echo "My name is Gael Quintana Romero"
-          echo "id ${{github.event.head_commit.message}}"
+          echo "Mensaje:     ${{ github.event.head_commit.message }}"
+          echo "Autor:       ${{ github.event.head_commit.author.name }} (<${{ github.event.head_commit.author.email }}>)"
+          echo "ID (SHA):    ${{ github.sha }}"
+          echo "URL Commit:  ${{ github.event.head_commit.url }}"
+          echo "Rama:        ${{ github.ref_name }}"
+          echo "Repositorio: ${{ github.repository }}"
