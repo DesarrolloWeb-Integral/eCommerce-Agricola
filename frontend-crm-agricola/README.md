@@ -72,4 +72,4 @@ export default defineConfig([
 ])
 ```
 
-Editado por Gael
+Editado por Gael nuevamente
