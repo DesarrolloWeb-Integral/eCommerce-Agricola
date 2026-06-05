@@ -1,3 +1,4 @@
+# Quintana Romero Gael - GIDS6093
 name: Hello World with eCommerce-Agricola
 on: 
   workflow_dispatch:
@@ -9,3 +10,9 @@ jobs:
     steps:
       - name: Say Hello
         run: echo "Hello World"
+        
+      - name: Fecha
+        run: date
+
+      - name: Carpeta
+        run: pwd
