@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:14.3
+    container_name: agrodb
+    restart: unless-stopped
+
+    ports:
+      - "${DB_PORT}:5432"
+
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${BD_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
