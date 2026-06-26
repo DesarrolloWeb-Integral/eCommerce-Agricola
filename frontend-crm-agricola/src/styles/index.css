@@ -1,0 +1,76 @@
+.app-toast-container {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 1090;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  width: min(25rem, calc(100vw - 2.5rem));
+  pointer-events: none;
+}
+
+.app-toast {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background-color: var(--bs-body-bg);
+  pointer-events: auto;
+  animation: app-toast-enter 0.35s ease-out both;
+}
+
+.app-toast-header {
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.app-toast-header .btn-close {
+  opacity: 0.7;
+}
+
+.app-toast-header .btn-close:hover,
+.app-toast-header .btn-close:focus {
+  opacity: 1;
+}
+
+.app-toast-body {
+  padding: 1rem;
+  color: var(--bs-body-color);
+  line-height: 1.5;
+}
+
+@keyframes app-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toast {
+    animation: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .app-toast-container {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+
+  .app-toast-header {
+    padding: 0.7rem 0.875rem;
+  }
+
+  .app-toast-body {
+    padding: 0.875rem;
+  }
+}
