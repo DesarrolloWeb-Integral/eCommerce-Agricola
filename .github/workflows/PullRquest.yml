@@ -1,0 +1,25 @@
+name: First Pull
+on:
+  pull_request:
+
+jobs:
+  Tarea1:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Detalles del Pull Request
+        run: |
+          echo "=== INFORMACIÓN DEL PULL REQUEST ==="
+          echo "Título:          ${{ github.event.pull_request.title }}"
+          echo "Contenido (Msg): ${{ github.event.pull_request.body }}"
+          echo "Estado (State):  ${{ github.event.pull_request.state }}"
+          echo "Fusionado (Merged): ${{ github.event.pull_request.merged }}"
+          echo ""
+          echo "=== DATOS DE ORIGEN (De dónde viene) ==="
+          echo "Rama Origen:     ${{ github.event.pull_request.head.ref }}"
+          echo "Commit ID (SHA): ${{ github.event.pull_request.head.sha }}"
+          echo "Repo Origen:     ${{ github.event.pull_request.head.repo.full_name }}"
+          echo ""
+          echo "=== DATOS DE DESTINO (A dónde va) ==="
+          echo "Rama Destino:    ${{ github.event.pull_request.base.ref }}"
+          echo "Repo Destino:    ${{ github.event.pull_request.base.repo.full_name }}"
