@@ -1,0 +1,237 @@
+import { useForm } from 'react-hook-form'
+
+import type { RegisterUserData } from '../types'
+
+interface RegisterUserFormProps {
+  onRegister: (userData: RegisterUserData) => Promise<boolean>
+}
+
+export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterUserData>({
+    mode: 'onTouched',
+  })
+
+  async function onSubmit(data: RegisterUserData): Promise<void> {
+    const wasRegistered = await onRegister(data)
+
+    if (wasRegistered) {
+      reset()
+    }
+  }
+
+  function handleCancel(): void {
+    reset()
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <div className="row g-4">
+        <div className="col-12 col-md-6">
+          <label htmlFor="name" className="form-label fw-semibold">
+            Nombre
+          </label>
+
+          <div className="input-group">
+            <span className="input-group-text bg-light">
+              <i className="bi bi-person" aria-hidden="true" />
+            </span>
+
+            <input
+              id="name"
+              type="text"
+              className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+              placeholder="Ingresa tu nombre"
+              autoComplete="given-name"
+              {...register('name', {
+                required: 'El nombre es obligatorio.',
+              })}
+            />
+          </div>
+
+          {errors.name && <div className="invalid-feedback d-block">{errors.name.message}</div>}
+        </div>
+
+        <div className="col-12 col-md-6">
+          <label htmlFor="lastName" className="form-label fw-semibold">
+            Apellido
+          </label>
+
+          <div className="input-group">
+            <span className="input-group-text bg-light">
+              <i className="bi bi-person-vcard" aria-hidden="true" />
+            </span>
+
+            <input
+              id="lastName"
+              type="text"
+              className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
+              placeholder="Ingresa tu apellido"
+              autoComplete="family-name"
+              {...register('lastName', {
+                required: 'El apellido es obligatorio.',
+              })}
+            />
+          </div>
+
+          {errors.lastName && (
+            <div className="invalid-feedback d-block">{errors.lastName.message}</div>
+          )}
+        </div>
+
+        <div className="col-12 col-md-6">
+          <label htmlFor="email" className="form-label fw-semibold">
+            Correo electrónico
+          </label>
+
+          <div className="input-group">
+            <span className="input-group-text bg-light">
+              <i className="bi bi-envelope" aria-hidden="true" />
+            </span>
+
+            <input
+              id="email"
+              type="email"
+              className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+              placeholder="correo@ejemplo.com"
+              autoComplete="email"
+              {...register('email', {
+                required: 'El correo electrónico es obligatorio.',
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: 'Ingresa un correo electrónico válido.',
+                },
+              })}
+            />
+          </div>
+
+          {errors.email && <div className="invalid-feedback d-block">{errors.email.message}</div>}
+        </div>
+
+        <div className="col-12 col-md-6">
+          <label htmlFor="phone" className="form-label fw-semibold">
+            Teléfono
+          </label>
+
+          <div className="input-group">
+            <span className="input-group-text bg-light">
+              <i className="bi bi-telephone" aria-hidden="true" />
+            </span>
+
+            <input
+              id="phone"
+              type="tel"
+              className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
+              placeholder="10 dígitos"
+              inputMode="numeric"
+              maxLength={10}
+              autoComplete="tel"
+              {...register('phone', {
+                required: 'El teléfono es obligatorio.',
+                pattern: {
+                  value: /^\d{10}$/,
+                  message: 'El teléfono debe tener exactamente 10 dígitos.',
+                },
+              })}
+            />
+          </div>
+
+          {errors.phone && <div className="invalid-feedback d-block">{errors.phone.message}</div>}
+        </div>
+
+        <div className="col-12 col-md-6">
+          <label htmlFor="role" className="form-label fw-semibold">
+            Rol
+          </label>
+
+          <div className="input-group">
+            <span className="input-group-text bg-light">
+              <i className="bi bi-person-badge" aria-hidden="true" />
+            </span>
+
+            <select
+              id="role"
+              className={`form-select ${errors.role ? 'is-invalid' : ''}`}
+              defaultValue=""
+              {...register('role', {
+                required: 'Selecciona un rol.',
+              })}
+            >
+              <option value="" disabled>
+                Selecciona un rol
+              </option>
+
+              <option value="CLIENTE">Cliente</option>
+              <option value="PROVEEDOR">Proveedor</option>
+            </select>
+          </div>
+
+          {errors.role && <div className="invalid-feedback d-block">{errors.role.message}</div>}
+        </div>
+
+        <div className="col-12 col-md-6">
+          <label htmlFor="password" className="form-label fw-semibold">
+            Contraseña
+          </label>
+
+          <div className="input-group">
+            <span className="input-group-text bg-light">
+              <i className="bi bi-shield-lock" aria-hidden="true" />
+            </span>
+
+            <input
+              id="password"
+              type="password"
+              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+              placeholder="Mínimo 8 caracteres"
+              autoComplete="new-password"
+              {...register('password', {
+                required: 'La contraseña es obligatoria.',
+                minLength: {
+                  value: 8,
+                  message: 'La contraseña debe tener al menos 8 caracteres.',
+                },
+              })}
+            />
+          </div>
+
+          {errors.password && (
+            <div className="invalid-feedback d-block">{errors.password.message}</div>
+          )}
+        </div>
+
+        <div className="col-12">
+          <div className="d-flex flex-column flex-sm-row justify-content-end gap-2 pt-2">
+            <button
+              type="button"
+              className="btn btn-outline-secondary px-4"
+              disabled={isSubmitting}
+              onClick={handleCancel}
+            >
+              <i className="bi bi-x-circle me-2" aria-hidden="true" />
+              Cancelar
+            </button>
+
+            <button type="submit" className="btn btn-success px-4" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
+                  Registrando...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-person-plus me-2" aria-hidden="true" />
+                  Registrarme
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  )
+}
