@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { PrivacyConsentSection, PRIVACY_NOTICE_VERSION } from './PrivacyConsentSection'
 import type { RegisterUserData } from '../types'
 
 interface RegisterUserFormProps {
@@ -7,25 +9,42 @@ interface RegisterUserFormProps {
 }
 
 export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
+  const [privacyAcceptedAt, setPrivacyAcceptedAt] = useState<string | null>(null)
+  const [showPrivacyError, setShowPrivacyError] = useState(false)
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterUserData>({
-    mode: 'onTouched',
-  })
+  } = useForm<RegisterUserData>({ mode: 'onTouched' })
 
   async function onSubmit(data: RegisterUserData): Promise<void> {
-    const wasRegistered = await onRegister(data)
+    if (!privacyAccepted) {
+      setShowPrivacyError(true)
+      return
+    }
+
+    const wasRegistered = await onRegister({
+      ...data,
+      privacyConsentAcceptedAt: privacyAcceptedAt!,
+      privacyConsentVersion: PRIVACY_NOTICE_VERSION,
+    })
 
     if (wasRegistered) {
       reset()
+      setPrivacyAccepted(false)
+      setPrivacyAcceptedAt(null)
+      setShowPrivacyError(false)
     }
   }
 
   function handleCancel(): void {
     reset()
+    setPrivacyAccepted(false)
+    setPrivacyAcceptedAt(null)
+    setShowPrivacyError(false)
   }
 
   return (
@@ -35,24 +54,19 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
           <label htmlFor="name" className="form-label fw-semibold">
             Nombre
           </label>
-
           <div className="input-group">
             <span className="input-group-text bg-light">
               <i className="bi bi-person" aria-hidden="true" />
             </span>
-
             <input
               id="name"
               type="text"
               className={`form-control ${errors.name ? 'is-invalid' : ''}`}
               placeholder="Ingresa tu nombre"
               autoComplete="given-name"
-              {...register('name', {
-                required: 'El nombre es obligatorio.',
-              })}
+              {...register('name', { required: 'El nombre es obligatorio.' })}
             />
           </div>
-
           {errors.name && <div className="invalid-feedback d-block">{errors.name.message}</div>}
         </div>
 
@@ -60,24 +74,19 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
           <label htmlFor="lastName" className="form-label fw-semibold">
             Apellido
           </label>
-
           <div className="input-group">
             <span className="input-group-text bg-light">
               <i className="bi bi-person-vcard" aria-hidden="true" />
             </span>
-
             <input
               id="lastName"
               type="text"
               className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
               placeholder="Ingresa tu apellido"
               autoComplete="family-name"
-              {...register('lastName', {
-                required: 'El apellido es obligatorio.',
-              })}
+              {...register('lastName', { required: 'El apellido es obligatorio.' })}
             />
           </div>
-
           {errors.lastName && (
             <div className="invalid-feedback d-block">{errors.lastName.message}</div>
           )}
@@ -87,12 +96,10 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
           <label htmlFor="email" className="form-label fw-semibold">
             Correo electrónico
           </label>
-
           <div className="input-group">
             <span className="input-group-text bg-light">
               <i className="bi bi-envelope" aria-hidden="true" />
             </span>
-
             <input
               id="email"
               type="email"
@@ -108,7 +115,6 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               })}
             />
           </div>
-
           {errors.email && <div className="invalid-feedback d-block">{errors.email.message}</div>}
         </div>
 
@@ -116,12 +122,10 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
           <label htmlFor="phone" className="form-label fw-semibold">
             Teléfono
           </label>
-
           <div className="input-group">
             <span className="input-group-text bg-light">
               <i className="bi bi-telephone" aria-hidden="true" />
             </span>
-
             <input
               id="phone"
               type="tel"
@@ -139,7 +143,6 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               })}
             />
           </div>
-
           {errors.phone && <div className="invalid-feedback d-block">{errors.phone.message}</div>}
         </div>
 
@@ -147,29 +150,23 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
           <label htmlFor="role" className="form-label fw-semibold">
             Rol
           </label>
-
           <div className="input-group">
             <span className="input-group-text bg-light">
               <i className="bi bi-person-badge" aria-hidden="true" />
             </span>
-
             <select
               id="role"
               className={`form-select ${errors.role ? 'is-invalid' : ''}`}
               defaultValue=""
-              {...register('role', {
-                required: 'Selecciona un rol.',
-              })}
+              {...register('role', { required: 'Selecciona un rol.' })}
             >
               <option value="" disabled>
                 Selecciona un rol
               </option>
-
               <option value="CLIENTE">Cliente</option>
               <option value="PROVEEDOR">Proveedor</option>
             </select>
           </div>
-
           {errors.role && <div className="invalid-feedback d-block">{errors.role.message}</div>}
         </div>
 
@@ -177,12 +174,10 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
           <label htmlFor="password" className="form-label fw-semibold">
             Contraseña
           </label>
-
           <div className="input-group">
             <span className="input-group-text bg-light">
               <i className="bi bi-shield-lock" aria-hidden="true" />
             </span>
-
             <input
               id="password"
               type="password"
@@ -198,10 +193,22 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               })}
             />
           </div>
-
           {errors.password && (
             <div className="invalid-feedback d-block">{errors.password.message}</div>
           )}
+        </div>
+
+        {/* ── Aviso de Privacidad ── */}
+        <div className="col-12">
+          <PrivacyConsentSection
+            accepted={privacyAccepted}
+            showError={showPrivacyError}
+            onConsentChange={(accepted, acceptedAt) => {
+              setPrivacyAccepted(accepted)
+              setPrivacyAcceptedAt(acceptedAt)
+              if (accepted) setShowPrivacyError(false)
+            }}
+          />
         </div>
 
         <div className="col-12">
