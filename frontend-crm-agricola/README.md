@@ -71,3 +71,6 @@ export default defineConfig([
   },
 ])
 ```
+
+Editado por Gael nuevamente
+verifificar push
