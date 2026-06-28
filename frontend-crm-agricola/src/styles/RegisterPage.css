@@ -1,0 +1,58 @@
+.register-page {
+  min-height: 100vh;
+}
+
+.welcome-panel {
+  min-height: 100vh;
+}
+
+.register-form-container {
+  min-height: 100vh;
+}
+
+.register-form-content {
+  max-width: 760px;
+}
+
+.register-icon-container,
+.welcome-icon {
+  width: 3.75rem;
+  height: 3.75rem;
+  flex: 0 0 3.75rem;
+}
+
+.welcome-feature-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 2.75rem;
+}
+
+.letter-spacing {
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 991.98px) {
+  .register-form-container {
+    min-height: 100vh;
+  }
+
+  .register-form-content {
+    max-width: 760px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .register-form-container > div {
+    padding: 1.5rem !important;
+  }
+
+  .register-icon-container {
+    width: 3rem;
+    height: 3rem;
+    flex-basis: 3rem;
+  }
+
+  .register-form-content h1 {
+    font-size: 1.5rem;
+  }
+}
