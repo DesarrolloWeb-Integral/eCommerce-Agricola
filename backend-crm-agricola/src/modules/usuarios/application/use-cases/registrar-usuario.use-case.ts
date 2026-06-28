@@ -45,6 +45,7 @@ export class RegistrarUsuarioUseCase {
       email,
       phone,
       passwordHash,
+      null,
       input.role,
       true,
       now,
