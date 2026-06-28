@@ -1,36 +1,36 @@
-import { useToast } from '../../../shared/hooks/useToast'
-import { registerUser } from '../services/auth.service'
-import type { RegisterUserData } from '../types'
+import { useToast } from '../../../shared/hooks/useToast';
+import { registerUser } from '../services/auth.service';
+import type { RegisterUserData } from '../types';
 
 interface UseRegisterUserReturn {
-  registerNewUser: (userData: RegisterUserData) => Promise<boolean>
+  registerNewUser: (userData: RegisterUserData) => Promise<boolean>;
 }
 
 export function useRegisterUser(): UseRegisterUserReturn {
-  const { showToast } = useToast()
+  const { showToast } = useToast();
 
   async function registerNewUser(userData: RegisterUserData): Promise<boolean> {
     try {
-      const response = await registerUser(userData)
+      const response = await registerUser(userData);
 
       showToast(response.message, {
         type: 'success',
-      })
+      });
 
-      return true
+      return true;
     } catch (error: unknown) {
       const message =
-        error instanceof Error ? error.message : 'Ocurrió un error al registrar al usuario.'
+        error instanceof Error ? error.message : 'Ocurrió un error al registrar al usuario.';
 
       showToast(message, {
         type: 'error',
-      })
+      });
 
-      return false
+      return false;
     }
   }
 
   return {
     registerNewUser,
-  }
+  };
 }

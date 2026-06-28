@@ -6,10 +6,10 @@ import type { UsuarioRepositoryPort } from '../../ports/out/usuario-repository.p
 
 export interface EditarUsuarioInput {
   id: string
-  name: string
-  lastName: string
-  email: string
-  phone: string
+  name?: string
+  lastName?: string
+  email?: string
+  phone?: string
 }
 
 @Injectable()
@@ -26,24 +26,29 @@ export class EditarUsuarioUseCase {
       throw new NotFoundException('Usuario no encontrado.')
     }
 
-    const email = input.email.trim().toLowerCase()
-    const phone = input.phone.trim()
+    const email = input.email?.trim().toLowerCase()
+    const phone = input.phone?.trim()
 
     await this.validateUniqueData(usuario.id, email, phone)
 
-    usuario.updateProfile(input.name.trim(), input.lastName.trim(), email, phone)
+    usuario.updateProfile({
+      name: input.name?.trim(),
+      lastName: input.lastName?.trim(),
+      email,
+      phone,
+    })
 
     return this.usuarioRepository.save(usuario)
   }
 
   private async validateUniqueData(
     currentUserId: string,
-    email: string,
-    phone: string
+    email?: string,
+    phone?: string
   ): Promise<void> {
     const [usuarioConMismoEmail, usuarioConMismoTelefono] = await Promise.all([
-      this.usuarioRepository.findByEmail(email),
-      this.usuarioRepository.findByPhone(phone),
+      email ? this.usuarioRepository.findByEmailIncludingDeleted(email) : Promise.resolve(null),
+      phone ? this.usuarioRepository.findByPhoneIncludingDeleted(phone) : Promise.resolve(null),
     ])
 
     if (usuarioConMismoEmail && usuarioConMismoEmail.id !== currentUserId) {

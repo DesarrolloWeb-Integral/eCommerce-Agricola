@@ -1,8 +1,8 @@
-import type { Toast, ToastType, ToastVisualConfig } from '../../types/toast.types'
+import type { Toast, ToastType, ToastVisualConfig } from '../../types/toast.types';
 
 interface ToastContainerProps {
-  toasts: Toast[]
-  onClose: (toastId: string) => void
+  toasts: Toast[];
+  onClose: (toastId: string) => void;
 }
 
 function getToastVisualConfig(type: ToastType): ToastVisualConfig {
@@ -31,16 +31,16 @@ function getToastVisualConfig(type: ToastType): ToastVisualConfig {
       headerClassName: 'bg-info-subtle text-info-emphasis',
       iconClassName: 'text-info',
     },
-  }
+  };
 
-  return toastConfig[type]
+  return toastConfig[type];
 }
 
 export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   return (
     <aside className="app-toast-container" aria-live="polite" aria-label="Notificaciones">
       {toasts.map((toast) => {
-        const visualConfig = getToastVisualConfig(toast.type)
+        const visualConfig = getToastVisualConfig(toast.type);
 
         return (
           <article
@@ -68,8 +68,8 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
               <p className="mb-0">{toast.message}</p>
             </div>
           </article>
-        )
+        );
       })}
     </aside>
-  )
+  );
 }

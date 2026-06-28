@@ -1,16 +1,16 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
 // Metadata del aviso — se guarda junto al consentimiento
-export const PRIVACY_NOTICE_VERSION = '1.0'
-export const PRIVACY_NOTICE_DATE = '2026-06-16'
+export const PRIVACY_NOTICE_VERSION = '1.0';
+export const PRIVACY_NOTICE_DATE = '2026-06-16';
 
 interface PrivacyConsentSectionProps {
   /** Callback con la fecha ISO en que el usuario aceptó */
-  onConsentChange: (accepted: boolean, acceptedAt: string | null, version: string) => void
+  onConsentChange: (accepted: boolean, acceptedAt: string | null, version: string) => void;
   /** Estado actual del checkbox (controlado desde el formulario padre) */
-  accepted: boolean
+  accepted: boolean;
   /** Mostrar error si intentaron enviar sin aceptar */
-  showError?: boolean
+  showError?: boolean;
 }
 
 export function PrivacyConsentSection({
@@ -18,12 +18,12 @@ export function PrivacyConsentSection({
   accepted,
   showError = false,
 }: PrivacyConsentSectionProps) {
-  const [showModal, setShowModal] = useState(false)
+  const [showModal, setShowModal] = useState(false);
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked
-    onConsentChange(checked, checked ? new Date().toISOString() : null, PRIVACY_NOTICE_VERSION)
-  }
+    const checked = e.target.checked;
+    onConsentChange(checked, checked ? new Date().toISOString() : null, PRIVACY_NOTICE_VERSION);
+  };
 
   return (
     <>
@@ -219,8 +219,8 @@ export function PrivacyConsentSection({
                   type="button"
                   className="btn btn-success"
                   onClick={() => {
-                    onConsentChange(true, new Date().toISOString(), PRIVACY_NOTICE_VERSION)
-                    setShowModal(false)
+                    onConsentChange(true, new Date().toISOString(), PRIVACY_NOTICE_VERSION);
+                    setShowModal(false);
                   }}
                 >
                   Entendido, acepto el Aviso de Privacidad
@@ -231,5 +231,5 @@ export function PrivacyConsentSection({
         </div>
       )}
     </>
-  )
+  );
 }

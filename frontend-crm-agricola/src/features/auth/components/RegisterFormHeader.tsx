@@ -18,5 +18,5 @@ export function RegisterFormHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }
