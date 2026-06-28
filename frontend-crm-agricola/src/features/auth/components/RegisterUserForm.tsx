@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { PrivacyConsentSection, PRIVACY_NOTICE_VERSION } from './PrivacyConsentSection'
+import { PrivacyConsentSection } from './Privacyconsentsection'
 import type { RegisterUserData } from '../types'
 
 interface RegisterUserFormProps {
@@ -10,7 +10,6 @@ interface RegisterUserFormProps {
 
 export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
-  const [privacyAcceptedAt, setPrivacyAcceptedAt] = useState<string | null>(null)
   const [showPrivacyError, setShowPrivacyError] = useState(false)
 
   const {
@@ -26,16 +25,11 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
       return
     }
 
-    const wasRegistered = await onRegister({
-      ...data,
-      privacyConsentAcceptedAt: privacyAcceptedAt!,
-      privacyConsentVersion: PRIVACY_NOTICE_VERSION,
-    })
+    const wasRegistered = await onRegister(data)
 
     if (wasRegistered) {
       reset()
       setPrivacyAccepted(false)
-      setPrivacyAcceptedAt(null)
       setShowPrivacyError(false)
     }
   }
@@ -43,7 +37,6 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
   function handleCancel(): void {
     reset()
     setPrivacyAccepted(false)
-    setPrivacyAcceptedAt(null)
     setShowPrivacyError(false)
   }
 
@@ -203,9 +196,8 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
           <PrivacyConsentSection
             accepted={privacyAccepted}
             showError={showPrivacyError}
-            onConsentChange={(accepted, acceptedAt) => {
+            onConsentChange={(accepted) => {
               setPrivacyAccepted(accepted)
-              setPrivacyAcceptedAt(acceptedAt)
               if (accepted) setShowPrivacyError(false)
             }}
           />
