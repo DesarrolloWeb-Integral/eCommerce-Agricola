@@ -1,43 +1,46 @@
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
-import { PrivacyConsentSection } from './Privacyconsentsection'
-import type { RegisterUserData } from '../types'
+import { PrivacyConsentSection } from './Privacyconsentsection';
+import type { RegisterUserData } from '../types';
 
 interface RegisterUserFormProps {
-  onRegister: (userData: RegisterUserData) => Promise<boolean>
+  onRegister: (userData: RegisterUserData) => Promise<boolean>;
 }
 
 export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
-  const [privacyAccepted, setPrivacyAccepted] = useState(false)
-  const [showPrivacyError, setShowPrivacyError] = useState(false)
+  const navigate = useNavigate();
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [showPrivacyError, setShowPrivacyError] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterUserData>({ mode: 'onTouched' })
+  } = useForm<RegisterUserData>({ mode: 'onTouched' });
 
   async function onSubmit(data: RegisterUserData): Promise<void> {
     if (!privacyAccepted) {
-      setShowPrivacyError(true)
-      return
+      setShowPrivacyError(true);
+      return;
     }
 
-    const wasRegistered = await onRegister(data)
+    const wasRegistered = await onRegister(data);
 
     if (wasRegistered) {
-      reset()
-      setPrivacyAccepted(false)
-      setShowPrivacyError(false)
+      reset();
+      setPrivacyAccepted(false);
+      setShowPrivacyError(false);
     }
   }
 
   function handleCancel(): void {
-    reset()
-    setPrivacyAccepted(false)
-    setShowPrivacyError(false)
+    reset();
+    setPrivacyAccepted(false);
+    setShowPrivacyError(false);
+    navigate('/login');
   }
 
   return (
@@ -197,8 +200,8 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
             accepted={privacyAccepted}
             showError={showPrivacyError}
             onConsentChange={(accepted) => {
-              setPrivacyAccepted(accepted)
-              if (accepted) setShowPrivacyError(false)
+              setPrivacyAccepted(accepted);
+              if (accepted) setShowPrivacyError(false);
             }}
           />
         </div>
@@ -232,5 +235,5 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
         </div>
       </div>
     </form>
-  )
+  );
 }

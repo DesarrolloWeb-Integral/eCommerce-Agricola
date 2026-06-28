@@ -9,6 +9,8 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  ForbiddenException,
+  UseGuards,
 } from '@nestjs/common'
 
 import { EditarUsuarioDto } from '../dto/editar-usuario.dto'
@@ -21,6 +23,12 @@ import { EditarUsuarioUseCase } from '../../../../application/use-cases/editar-u
 import type { EditarUsuarioInput } from '../../../../application/use-cases/editar-usuario.use-case'
 import { RegistrarUsuarioUseCase } from '../../../../application/use-cases/registrar-usuario.use-case'
 import type { RegistrarUsuarioInput } from '../../../../application/use-cases/registrar-usuario.use-case'
+import { JwtAuthGuard } from 'src/modules/auth/adapters/in/passport/jwt-auth.guard'
+import { CurrentUser } from 'src/modules/auth/adapters/in/http/decorators/current-user.decorator'
+import type { UsuarioAutenticado } from 'src/modules/auth/domain/entities/usuario-autenticado'
+import { RolesGuard } from 'src/modules/auth/adapters/in/passport/roles.guard'
+import { Roles } from 'src/modules/auth/adapters/in/http/decorators/roles.decorator'
+import { RolUsuario } from 'src/modules/usuarios/domain/value-objects/rol-usuario.enum'
 
 interface UsuarioResponse {
   id: string
@@ -77,6 +85,8 @@ export class UsuariosController {
   }
 
   @Get('buscar/email/:email')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMINISTRADOR)
   async buscarPorEmail(@Param('email') email: string): Promise<UsuarioResponse> {
     const usuario = await this.buscarUsuarioPorEmailUseCase.execute(email)
 
@@ -84,6 +94,8 @@ export class UsuariosController {
   }
 
   @Get('buscar/telefono/:phone')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMINISTRADOR)
   async buscarPorTelefono(@Param('phone') phone: string): Promise<UsuarioResponse> {
     const usuario = await this.buscarUsuarioPorTelefonoUseCase.execute(phone)
 
@@ -91,6 +103,8 @@ export class UsuariosController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMINISTRADOR)
   async buscarPorId(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string
   ): Promise<UsuarioResponse> {
@@ -100,10 +114,16 @@ export class UsuariosController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async editar(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() editarUsuarioDto: EditarUsuarioDto
+    @Body() editarUsuarioDto: EditarUsuarioDto,
+    @CurrentUser() usuarioAutenticado: UsuarioAutenticado
   ): Promise<UsuarioResponse> {
+    if (usuarioAutenticado.id !== id && usuarioAutenticado.role !== RolUsuario.ADMINISTRADOR) {
+      throw new ForbiddenException('No tienes permiso para editar el perfil de otro usuario.')
+    }
+
     const input: EditarUsuarioInput = {
       id,
       name: editarUsuarioDto.name,
@@ -118,10 +138,16 @@ export class UsuariosController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async desactivar(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @CurrentUser() usuarioAutenticado: UsuarioAutenticado
   ): Promise<MensajeResponse> {
+    if (usuarioAutenticado.id !== id && usuarioAutenticado.role !== RolUsuario.ADMINISTRADOR) {
+      throw new ForbiddenException('No tienes permiso para desactivar la cuenta de otro usuario.')
+    }
+
     await this.desactivarUsuarioUseCase.execute(id)
 
     return {

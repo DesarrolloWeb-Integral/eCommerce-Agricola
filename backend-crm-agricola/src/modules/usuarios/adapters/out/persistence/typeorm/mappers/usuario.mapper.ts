@@ -10,6 +10,7 @@ export class UsuarioMapper {
       usuarioEntity.email,
       usuarioEntity.phone,
       usuarioEntity.passwordHash,
+      usuarioEntity.refreshTokenHash,
       usuarioEntity.role,
       usuarioEntity.isActive,
       usuarioEntity.createdAt,
@@ -27,6 +28,7 @@ export class UsuarioMapper {
     usuarioEntity.email = usuario.email
     usuarioEntity.phone = usuario.phone
     usuarioEntity.passwordHash = usuario.passwordHash
+    usuarioEntity.refreshTokenHash = usuario.refreshTokenHash
     usuarioEntity.role = usuario.role
     usuarioEntity.isActive = usuario.isActive
     usuarioEntity.createdAt = usuario.createdAt

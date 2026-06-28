@@ -23,5 +23,5 @@ export function RegisterWelcomePanel() {
         </div>
       </section>
     </aside>
-  )
+  );
 }

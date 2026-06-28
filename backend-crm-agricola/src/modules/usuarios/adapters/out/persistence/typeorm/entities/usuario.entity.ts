@@ -41,6 +41,13 @@ export class UsuarioEntity {
   passwordHash!: string
 
   @Column({
+    name: 'refresh_token_hash',
+    type: 'text',
+    nullable: true,
+  })
+  refreshTokenHash!: string | null
+
+  @Column({
     type: 'enum',
     enum: RolUsuario,
     enumName: 'rol_usuario_enum',

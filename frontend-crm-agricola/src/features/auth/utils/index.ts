@@ -1,0 +1,1 @@
+export { getDashboardPathByRole } from './getDashboardPathByRole';
