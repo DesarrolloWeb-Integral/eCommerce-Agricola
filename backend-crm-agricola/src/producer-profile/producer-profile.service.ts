@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { ILike, Repository } from 'typeorm'
 import { ProducerProfile } from './entities/producer-profile.entity'
 import {
   CreateProducerProfileDto,
@@ -28,18 +28,16 @@ export class ProducerProfileService {
     if (existing) {
       throw new ConflictException('Ya tienes un perfil de productor registrado.')
     }
-
     const profile = this.profileRepository.create({
       userId,
       ...dto,
       socialLinks: dto.socialLinks ?? {},
     })
-
     const saved = await this.profileRepository.save(profile)
     return this.toPrivateDto(saved)
   }
 
-  // ─── Actualizar perfil (solo el propietario) ─────────────────────────────
+  // ─── Actualizar perfil ───────────────────────────────────────────────────
 
   async update(
     profileId: string,
@@ -48,13 +46,12 @@ export class ProducerProfileService {
   ): Promise<PrivateProducerProfileDto> {
     const profile = await this.findEntityOrFail(profileId)
     this.assertOwnership(profile, requestingUserId)
-
     Object.assign(profile, dto)
     const saved = await this.profileRepository.save(profile)
     return this.toPrivateDto(saved)
   }
 
-  // ─── Ver perfil propio (privado) ─────────────────────────────────────────
+  // ─── Ver perfil propio ───────────────────────────────────────────────────
 
   async findOwn(requestingUserId: string): Promise<PrivateProducerProfileDto> {
     const profile = await this.profileRepository.findOne({
@@ -66,7 +63,7 @@ export class ProducerProfileService {
     return this.toPrivateDto(profile)
   }
 
-  // ─── Ver perfil público (clientes) ───────────────────────────────────────
+  // ─── Ver perfil público por ID ───────────────────────────────────────────
 
   async findPublicById(profileId: string): Promise<PublicProducerProfileDto> {
     const profile = await this.findEntityOrFail(profileId)
@@ -76,6 +73,8 @@ export class ProducerProfileService {
     return this.toPublicDto(profile)
   }
 
+  // ─── Ver perfil público por userId ──────────────────────────────────────
+
   async findPublicByUserId(userId: string): Promise<PublicProducerProfileDto> {
     const profile = await this.profileRepository.findOne({ where: { userId } })
     if (!profile || !profile.isActive) {
@@ -84,12 +83,38 @@ export class ProducerProfileService {
     return this.toPublicDto(profile)
   }
 
+  // ─── NUEVO: Buscar por nombre comercial ─────────────────────────────────
+
+  async searchByName(query: string): Promise<PublicProducerProfileDto[]> {
+    if (!query || query.trim().length < 2) return []
+
+    const profiles = await this.profileRepository.find({
+      where: {
+        businessName: ILike(`%${query.trim()}%`),
+        isActive: true,
+      },
+      order: { businessName: 'ASC' },
+      take: 20,
+    })
+
+    return profiles.map((p) => this.toPublicDto(p))
+  }
+
+  // ─── NUEVO: Listar recomendados (más recientes activos) ─────────────────
+
+  async findRecommended(limit = 6): Promise<PublicProducerProfileDto[]> {
+    const profiles = await this.profileRepository.find({
+      where: { isActive: true },
+      order: { createdAt: 'DESC' },
+      take: limit,
+    })
+    return profiles.map((p) => this.toPublicDto(p))
+  }
+
   // ─── Helpers internos ────────────────────────────────────────────────────
 
   private async findEntityOrFail(profileId: string): Promise<ProducerProfile> {
-    const profile = await this.profileRepository.findOne({
-      where: { id: profileId },
-    })
+    const profile = await this.profileRepository.findOne({ where: { id: profileId } })
     if (!profile) {
       throw new NotFoundException(`Perfil con id '${profileId}' no encontrado.`)
     }
@@ -102,7 +127,6 @@ export class ProducerProfileService {
     }
   }
 
-  /** Mapeo a DTO PÚBLICO — jamás incluye internalNotes ni userId */
   private toPublicDto(p: ProducerProfile): PublicProducerProfileDto {
     return {
       id: p.id,
@@ -117,7 +141,6 @@ export class ProducerProfileService {
     }
   }
 
-  /** Mapeo a DTO PRIVADO — incluye campos sensibles solo para el propietario */
   private toPrivateDto(p: ProducerProfile): PrivateProducerProfileDto {
     return {
       ...this.toPublicDto(p),

@@ -1,11 +1,9 @@
-import React from 'react'
-import { useProducerProfileForm } from '../hooks/useProducerProfileForm'
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useProducerProfileForm } from '../hooks/useProducerProfileForm';
 
-/**
- * Formulario de creación / edición del perfil de productor.
- * Usa Bootstrap 5 (clases estándar) tal como el resto del proyecto.
- */
 export function ProducerProfileForm() {
+  const navigate = useNavigate();
   const {
     form,
     errors,
@@ -18,7 +16,7 @@ export function ProducerProfileForm() {
     handleSocialLinkChange,
     handleBlur,
     handleSubmit,
-  } = useProducerProfileForm()
+  } = useProducerProfileForm();
 
   if (isFetching) {
     return (
@@ -27,7 +25,7 @@ export function ProducerProfileForm() {
           <span className="visually-hidden">Cargando…</span>
         </div>
       </div>
-    )
+    );
   }
 
   const field = (name: keyof typeof form) => ({
@@ -39,11 +37,22 @@ export function ProducerProfileForm() {
     onBlur: () => handleBlur(name),
     className: `form-control${errors[name] ? ' is-invalid' : ''}`,
     disabled: isLoading,
-  })
+  });
 
   return (
     <div className="container py-4" style={{ maxWidth: 720 }}>
-      <h2 className="mb-1">{isEditing ? 'Editar perfil' : 'Crear perfil de productor'}</h2>
+      {/* ── Encabezado con botón de regreso ── */}
+      <div className="d-flex align-items-center gap-3 mb-4">
+        <button
+          type="button"
+          className="btn btn-outline-secondary btn-sm"
+          onClick={() => navigate('/dashboard/proveedor')}
+        >
+          ← Volver al dashboard
+        </button>
+        <h2 className="mb-0">{isEditing ? 'Editar perfil' : 'Crear perfil de productor'}</h2>
+      </div>
+
       <p className="text-muted mb-4">
         Esta información será visible para los clientes que visiten tu perfil.
       </p>
@@ -78,8 +87,8 @@ export function ProducerProfileForm() {
           <textarea
             rows={4}
             maxLength={1000}
-            {...field('description')}
             placeholder="Cuéntanos sobre tu negocio, productos y valores…"
+            {...field('description')}
           />
           {errors.description && <div className="invalid-feedback">{errors.description}</div>}
           <div className="form-text">{form.description.length}/1 000 caracteres</div>
@@ -107,7 +116,6 @@ export function ProducerProfileForm() {
         {/* ── Contacto ── */}
         <fieldset className="mb-3">
           <legend className="fw-semibold fs-6 mb-2">Medios de contacto</legend>
-
           <div className="row g-3">
             <div className="col-md-6">
               <label htmlFor="contactPhone" className="form-label">
@@ -116,7 +124,6 @@ export function ProducerProfileForm() {
               <input type="tel" placeholder="+52 477 123 4567" {...field('contactPhone')} />
               {errors.contactPhone && <div className="invalid-feedback">{errors.contactPhone}</div>}
             </div>
-
             <div className="col-md-6">
               <label htmlFor="contactEmail" className="form-label">
                 Correo de contacto
@@ -170,23 +177,34 @@ export function ProducerProfileForm() {
           </div>
         </div>
 
-        <button type="submit" className="btn btn-success px-4" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <span
-                className="spinner-border spinner-border-sm me-2"
-                role="status"
-                aria-hidden="true"
-              />
-              Guardando…
-            </>
-          ) : isEditing ? (
-            'Guardar cambios'
-          ) : (
-            'Crear perfil'
-          )}
-        </button>
+        {/* ── Botones de acción ── */}
+        <div className="d-flex gap-2">
+          <button type="submit" className="btn btn-success px-4" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                />
+                Guardando…
+              </>
+            ) : isEditing ? (
+              'Guardar cambios'
+            ) : (
+              'Crear perfil'
+            )}
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-secondary px-4"
+            onClick={() => navigate('/dashboard/proveedor')}
+            disabled={isLoading}
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
-  )
+  );
 }
