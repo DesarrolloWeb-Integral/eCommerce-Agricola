@@ -10,7 +10,8 @@ export function ProducerProfileForm() {
     isLoading,
     isFetching,
     apiError,
-    successMessage,
+    showToast,
+    setShowToast,
     isEditing,
     handleChange,
     handleSocialLinkChange,
@@ -41,7 +42,28 @@ export function ProducerProfileForm() {
 
   return (
     <div className="container py-4" style={{ maxWidth: 720 }}>
-      {/* ── Encabezado con botón de regreso ── */}
+      {/* Toast flotante */}
+      <div className="toast-container position-fixed bottom-0 end-0 p-3" style={{ zIndex: 9999 }}>
+        <div
+          className={`toast align-items-center text-bg-success border-0 ${showToast ? 'show' : ''}`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="d-flex">
+            <div className="toast-body fw-semibold">
+              ✅ {isEditing ? 'Perfil actualizado correctamente.' : 'Perfil creado correctamente.'}
+            </div>
+            <button
+              type="button"
+              className="btn-close btn-close-white me-2 m-auto"
+              onClick={() => setShowToast(false)}
+              aria-label="Cerrar"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Encabezado */}
       <div className="d-flex align-items-center gap-3 mb-4">
         <button
           type="button"
@@ -62,14 +84,8 @@ export function ProducerProfileForm() {
           {apiError}
         </div>
       )}
-      {successMessage && (
-        <div className="alert alert-success" role="alert">
-          {successMessage}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} noValidate>
-        {/* ── Nombre comercial ── */}
         <div className="mb-3">
           <label htmlFor="businessName" className="form-label fw-semibold">
             Nombre comercial <span className="text-danger">*</span>
@@ -79,7 +95,6 @@ export function ProducerProfileForm() {
           <div className="form-text">{form.businessName.length}/120 caracteres</div>
         </div>
 
-        {/* ── Descripción ── */}
         <div className="mb-3">
           <label htmlFor="description" className="form-label fw-semibold">
             Descripción
@@ -87,14 +102,13 @@ export function ProducerProfileForm() {
           <textarea
             rows={4}
             maxLength={1000}
-            placeholder="Cuéntanos sobre tu negocio, productos y valores…"
+            placeholder="Cuéntanos sobre tu negocio…"
             {...field('description')}
           />
           {errors.description && <div className="invalid-feedback">{errors.description}</div>}
           <div className="form-text">{form.description.length}/1 000 caracteres</div>
         </div>
 
-        {/* ── Ubicación general ── */}
         <div className="mb-3">
           <label htmlFor="generalLocation" className="form-label fw-semibold">
             Ubicación general
@@ -113,7 +127,6 @@ export function ProducerProfileForm() {
           </div>
         </div>
 
-        {/* ── Contacto ── */}
         <fieldset className="mb-3">
           <legend className="fw-semibold fs-6 mb-2">Medios de contacto</legend>
           <div className="row g-3">
@@ -135,7 +148,6 @@ export function ProducerProfileForm() {
           </div>
         </fieldset>
 
-        {/* ── Redes sociales ── */}
         <fieldset className="mb-3">
           <legend className="fw-semibold fs-6 mb-2">Redes sociales</legend>
           <div className="row g-3">
@@ -160,7 +172,6 @@ export function ProducerProfileForm() {
           {errors.socialLinks && <div className="text-danger small mt-1">{errors.socialLinks}</div>}
         </fieldset>
 
-        {/* ── Notas internas (PRIVADAS) ── */}
         <div className="mb-4">
           <label htmlFor="internalNotes" className="form-label fw-semibold">
             Notas internas <span className="badge bg-secondary fw-normal">privadas</span>
@@ -177,7 +188,6 @@ export function ProducerProfileForm() {
           </div>
         </div>
 
-        {/* ── Botones de acción ── */}
         <div className="d-flex gap-2">
           <button type="submit" className="btn btn-success px-4" disabled={isLoading}>
             {isLoading ? (

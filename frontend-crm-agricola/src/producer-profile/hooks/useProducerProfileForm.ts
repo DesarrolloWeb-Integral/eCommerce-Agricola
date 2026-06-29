@@ -31,8 +31,8 @@ export function useProducerProfileForm() {
   const [isFetching, setIsFetching] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
-  // Cargar perfil existente al montar
   useEffect(() => {
     getOwnProducerProfile()
       .then((p) => {
@@ -47,13 +47,10 @@ export function useProducerProfileForm() {
           internalNotes: p.internalNotes ?? '',
         });
       })
-      .catch(() => {
-        // Sin perfil todavía — modo creación
-      })
+      .catch(() => {})
       .finally(() => setIsFetching(false));
   }, []);
 
-  // ✅ Fix 1: useMemo en lugar de useEffect para derivar errores sin setState en efecto
   const errors = useMemo<ProfileFormErrors>(() => {
     const allErrors = validateProfileForm(form);
     const relevantErrors: ProfileFormErrors = {};
@@ -84,7 +81,6 @@ export function useProducerProfileForm() {
       setApiError(null);
       setSuccessMessage(null);
 
-      // Marcar todos los campos como tocados para mostrar errores
       const allTouched = Object.fromEntries(
         Object.keys(INITIAL_FORM).map((k) => [k, true])
       ) as Partial<Record<keyof ProducerProfileFormData, boolean>>;
@@ -115,8 +111,11 @@ export function useProducerProfileForm() {
         setSuccessMessage(
           profile ? 'Perfil actualizado correctamente.' : 'Perfil creado correctamente.'
         );
+        setShowToast(true);
+
+        // Auto-cerrar después de 4 segundos
+        setTimeout(() => setShowToast(false), 4000);
       } catch (err: unknown) {
-        // ✅ Fix 2: err tipado como unknown, cast seguro a string
         const message = err instanceof Error ? err.message : 'Ocurrió un error. Intenta de nuevo.';
         setApiError(message);
       } finally {
@@ -134,6 +133,8 @@ export function useProducerProfileForm() {
     isFetching,
     apiError,
     successMessage,
+    showToast,
+    setShowToast,
     isEditing: !!profile,
     handleChange,
     handleSocialLinkChange,
