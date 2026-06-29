@@ -8,7 +8,7 @@ import { PedidosModule } from './modules/pedidos/pedidos.module'
 import { PagosComisionesModule } from './modules/payments/pagos-comisiones.module'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
-
+import { ProducerProfileModule } from './producer-profile/producer-profile.module'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,6 +33,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
     ChatModule,
     PedidosModule,
     PagosComisionesModule,
+    ProducerProfileModule,
   ],
   controllers: [],
   providers: [],
