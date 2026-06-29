@@ -1,7 +1,7 @@
-import { RegisterPage } from '../features/auth'
+import { AppRoutes } from './routes/AppRoutes';
 
 function App() {
-  return <RegisterPage />
+  return <AppRoutes />;
 }
 
-export default App
+export default App;

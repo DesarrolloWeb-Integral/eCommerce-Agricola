@@ -35,5 +35,6 @@ import { USUARIO_REPOSITORY_PORT } from './ports/out/usuario-repository.port'
       useExisting: BcryptPasswordHasherAdapter,
     },
   ],
+  exports: [PASSWORD_HASHER_PORT, USUARIO_REPOSITORY_PORT],
 })
 export class UsuariosModule {}

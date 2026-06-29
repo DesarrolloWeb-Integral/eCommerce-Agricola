@@ -45,7 +45,6 @@ cd backend-crm-agricola
 
 Crea el archivo `.env` a partir de `.env.template` y configura las variables:
 
-
 Levanta la base de datos:
 
 ```bash
@@ -73,7 +72,6 @@ cd frontend-crm-agricola
 ```
 
 Crea o revisa el archivo `.env` a partir de `.env.template` y configura las variables:
-
 
 Inicia el frontend:
 

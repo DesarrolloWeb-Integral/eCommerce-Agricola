@@ -1,10 +1,10 @@
-import { RegisterFormHeader, RegisterUserForm, RegisterWelcomePanel } from '../components'
-import { useRegisterUser } from '../hooks/useRegisterUser'
+import { RegisterFormHeader, RegisterUserForm, RegisterWelcomePanel } from '../components';
+import { useRegisterUser } from '../hooks/useRegisterUser';
 
-import '../../../styles/RegisterPage.css'
+import '../../../styles/RegisterPage.css';
 
 export function RegisterPage() {
-  const { registerNewUser } = useRegisterUser()
+  const { registerNewUser } = useRegisterUser();
 
   return (
     <main className="register-page min-vh-100">
@@ -26,5 +26,5 @@ export function RegisterPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
