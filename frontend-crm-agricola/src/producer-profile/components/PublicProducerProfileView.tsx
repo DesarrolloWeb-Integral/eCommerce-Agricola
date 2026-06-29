@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
-import type { PublicProducerProfile } from '../types/producer-profile.types'
-import { getPublicProducerProfile } from '../services/producer-profile.service'
+import { useEffect, useState } from 'react';
+import type { PublicProducerProfile } from '../types/producer-profile.types';
+import { getPublicProducerProfile } from '../services/producer-profile.service';
 
 interface Props {
-  profileId: string
+  profileId: string;
 }
 
 /**
@@ -11,16 +11,16 @@ interface Props {
  * No muestra ningún dato privado (internalNotes, userId, etc.).
  */
 export function PublicProducerProfileView({ profileId }: Props) {
-  const [profile, setProfile] = useState<PublicProducerProfile | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [profile, setProfile] = useState<PublicProducerProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getPublicProducerProfile(profileId)
       .then(setProfile)
       .catch((err) => setError(err.message ?? 'No se pudo cargar el perfil.'))
-      .finally(() => setIsLoading(false))
-  }, [profileId])
+      .finally(() => setIsLoading(false));
+  }, [profileId]);
 
   if (isLoading) {
     return (
@@ -29,7 +29,7 @@ export function PublicProducerProfileView({ profileId }: Props) {
           <span className="visually-hidden">Cargando…</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !profile) {
@@ -37,10 +37,10 @@ export function PublicProducerProfileView({ profileId }: Props) {
       <div className="alert alert-warning m-4" role="alert">
         {error ?? 'Perfil no encontrado.'}
       </div>
-    )
+    );
   }
 
-  const socialPlatforms = Object.entries(profile.socialLinks ?? {}).filter(([, url]) => !!url)
+  const socialPlatforms = Object.entries(profile.socialLinks ?? {}).filter(([, url]) => !!url);
 
   return (
     <div className="container py-4" style={{ maxWidth: 720 }}>
@@ -115,5 +115,5 @@ export function PublicProducerProfileView({ profileId }: Props) {
         })}
       </p>
     </div>
-  )
+  );
 }
