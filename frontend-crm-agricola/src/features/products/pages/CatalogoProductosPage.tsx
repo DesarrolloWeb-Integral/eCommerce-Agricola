@@ -8,6 +8,7 @@ import {
 } from '../services/producto.service';
 import type { Producto, ProductoDetalle, CategoriaProducto } from '../types/producto.types';
 import { CATEGORIAS, CATEGORIA_LABELS } from '../types/producto.types';
+import { useCart } from '../../orders/hooks';
 
 export function CatalogoProductosPage() {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ export function CatalogoProductosPage() {
   const [detalle, setDetalle] = useState<ProductoDetalle | null>(null);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cantidades, setCantidades] = useState<Record<string, number>>({});
+  const [cartMessage, setCartMessage] = useState<string | null>(null);
+  const { addItem, summary } = useCart();
 
   useEffect(() => {
     const delay = busqueda.trim().length >= 2 ? 400 : 0;
@@ -71,19 +75,65 @@ export function CatalogoProductosPage() {
     setCategoriaActiva((prev) => (prev === cat ? null : cat));
   }
 
+  function getCantidad(producto: Producto): number {
+    return cantidades[producto.id] ?? 1;
+  }
+
+  function handleCantidadChange(producto: Producto, value: number): void {
+    const maxQuantity = Math.max(producto.cantidad, 1);
+    const nextQuantity = Number.isInteger(value) ? value : 1;
+    const safeQuantity = Math.min(Math.max(nextQuantity, 1), maxQuantity);
+
+    setCantidades((current) => ({
+      ...current,
+      [producto.id]: safeQuantity,
+    }));
+  }
+
+  function handleAddToCart(producto: Producto, producerName?: string): void {
+    addItem(
+      {
+        productId: producto.id,
+        producerProfileId: producto.producerProfileId,
+        producerName,
+        name: producto.nombre,
+        category: producto.categoria,
+        unitPrice: producto.precio,
+        availableQuantity: producto.cantidad,
+      },
+      getCantidad(producto)
+    );
+
+    setCartMessage(`${producto.nombre} agregado al carrito.`);
+  }
+
   return (
     <div className="container py-4" style={{ maxWidth: 960 }}>
-      <div className="d-flex align-items-center gap-3 mb-4">
+      <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
         <button
+          type="button"
           className="btn btn-outline-secondary btn-sm"
           onClick={() => navigate('/dashboard/cliente')}
         >
           ← Volver
         </button>
         <h2 className="mb-0">Catálogo de productos agrícolas</h2>
+
+        <button
+          type="button"
+          className="btn btn-success btn-sm ms-auto"
+          onClick={() => navigate('/dashboard/cliente/pedidos/nuevo')}
+        >
+          <i className="bi bi-cart3 me-2" aria-hidden="true" />
+          Carrito
+          {summary.totalItems > 0 && (
+            <span className="badge text-bg-light ms-2">{summary.totalItems}</span>
+          )}
+        </button>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
+      {cartMessage && <div className="alert alert-success">{cartMessage}</div>}
 
       <div className="mb-3">
         <input
@@ -243,7 +293,44 @@ export function CatalogoProductosPage() {
                     <span className="fs-5 fw-bold text-success">${p.precio.toFixed(2)}</span>
                     <span className="text-muted small">{p.cantidad} uds.</span>
                   </div>
+                  <div className="input-group input-group-sm mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      disabled={!p.disponible || p.cantidad <= 0 || getCantidad(p) <= 1}
+                      onClick={() => handleCantidadChange(p, getCantidad(p) - 1)}
+                    >
+                      <i className="bi bi-dash" aria-hidden="true" />
+                    </button>
+                    <input
+                      type="number"
+                      className="form-control text-center"
+                      min={1}
+                      max={p.cantidad}
+                      value={getCantidad(p)}
+                      disabled={!p.disponible || p.cantidad <= 0}
+                      onChange={(event) => handleCantidadChange(p, Number(event.target.value))}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      disabled={!p.disponible || p.cantidad <= 0 || getCantidad(p) >= p.cantidad}
+                      onClick={() => handleCantidadChange(p, getCantidad(p) + 1)}
+                    >
+                      <i className="bi bi-plus" aria-hidden="true" />
+                    </button>
+                  </div>
                   <button
+                    type="button"
+                    className="btn btn-success btn-sm mt-2"
+                    disabled={!p.disponible || p.cantidad <= 0}
+                    onClick={() => handleAddToCart(p)}
+                  >
+                    <i className="bi bi-cart-plus me-2" aria-hidden="true" />
+                    Agregar al carrito
+                  </button>
+                  <button
+                    type="button"
                     className="btn btn-outline-success btn-sm mt-3"
                     onClick={() => verDetalle(p.id)}
                   >

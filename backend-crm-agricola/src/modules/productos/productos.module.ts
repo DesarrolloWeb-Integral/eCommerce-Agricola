@@ -27,5 +27,6 @@ import { ProducerProfileModule } from 'src/producer-profile/producer-profile.mod
       useExisting: TypeormProductoRepository,
     },
   ],
+  exports: [PRODUCTO_REPOSITORY_PORT],
 })
 export class ProductosModule {}

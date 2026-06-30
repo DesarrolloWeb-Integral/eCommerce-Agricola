@@ -14,6 +14,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
 import { RoleRoute } from './RoleRoute';
 import { MisProductosPage, CatalogoProductosPage } from '../../features/products';
+import { CreateOrderPage, MyOrdersPage, OrdersForMyProductsPage } from '../../features/orders';
 
 export function AppRoutes() {
   return (
@@ -33,6 +34,10 @@ export function AppRoutes() {
 
         <Route path="/dashboard/cliente" element={<ClientDashboardPage />} />
 
+        <Route path="/dashboard/cliente/productos" element={<CatalogoProductosPage />} />
+
+        <Route path="/dashboard/cliente/pedidos" element={<MyOrdersPage />} />
+
         <Route path="/dashboard/proveedor" element={<ProviderDashboardPage />} />
 
         {/* Perfil del productor */}
@@ -41,6 +46,14 @@ export function AppRoutes() {
         <Route path="/dashboard/administrador" element={<AdminDashboardPage />} />
 
         <Route path="/dashboard/proveedor/productos" element={<MisProductosPage />} />
+
+        <Route element={<RoleRoute allowedRoles={['CLIENTE']} />}>
+          <Route path="/dashboard/cliente/pedidos/nuevo" element={<CreateOrderPage />} />
+        </Route>
+
+        <Route element={<RoleRoute allowedRoles={['PROVEEDOR']} />}>
+          <Route path="/dashboard/proveedor/pedidos" element={<OrdersForMyProductsPage />} />
+        </Route>
 
         <Route element={<RoleRoute allowedRoles={['ADMINISTRADOR']} />}>
           <Route path="/usuarios" element={<GetUserByIdPage />} />
