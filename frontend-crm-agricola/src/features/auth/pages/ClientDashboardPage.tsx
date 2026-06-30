@@ -1,8 +1,11 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RoleDashboard } from '../components';
-import { searchProducersByName, getRecommendedProducers } from '../../../producer-profile';
+
+import { getRecommendedProducers, searchProducersByName } from '../../../producer-profile';
 import type { PublicProducerProfile } from '../../../producer-profile';
+import { DashboardActionCard } from '../components';
+
+import '../../../styles/ClientDashboardPage.css';
 
 function ProducerCard({
   profile,
@@ -11,44 +14,54 @@ function ProducerCard({
   profile: PublicProducerProfile;
   onClick: () => void;
 }) {
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
+    if (event.key === 'Enter') {
+      onClick();
+    }
+  }
+
   return (
     <div
-      className="card h-100 shadow-sm"
-      onClick={onClick}
-      style={{ cursor: 'pointer' }}
+      className="card border-0 shadow-sm rounded-4 h-100"
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && onClick()}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
     >
-      <div className="card-body">
-        <div className="d-flex align-items-center gap-2 mb-2">
+      <div className="card-body p-4">
+        <div className="d-flex align-items-center gap-3 mb-3">
           <div
-            className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center fw-bold"
-            style={{ width: 40, height: 40, flexShrink: 0, fontSize: '1rem' }}
+            className="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+            style={{ width: '3rem', height: '3rem' }}
+            aria-hidden="true"
           >
             {profile.businessName.charAt(0).toUpperCase()}
           </div>
-          <h5 className="card-title mb-0 text-truncate">{profile.businessName}</h5>
+
+          <div className="overflow-hidden">
+            <h3 className="h6 fw-bold mb-1 text-truncate">{profile.businessName}</h3>
+
+            <p className="text-secondary small mb-0">Productor registrado</p>
+          </div>
         </div>
+
         {profile.generalLocation && (
-          <p className="text-muted small mb-1">📍 {profile.generalLocation}</p>
+          <div className="d-flex align-items-center gap-2 text-secondary small mb-3">
+            <i className="bi bi-geo-alt text-success" aria-hidden="true" />
+            <span className="text-truncate">{profile.generalLocation}</span>
+          </div>
         )}
+
         {profile.description && (
-          <p
-            className="card-text small"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {profile.description}
-          </p>
+          <p className="card-text text-secondary small mb-0">{profile.description}</p>
         )}
       </div>
-      <div className="card-footer bg-transparent border-0 pt-0">
-        <span className="text-success small fw-semibold">Ver perfil →</span>
+
+      <div className="card-footer bg-white border-0 px-4 pb-4 pt-0">
+        <span className="btn btn-outline-success btn-sm w-100">
+          <i className="bi bi-person-lines-fill me-2" aria-hidden="true" />
+          Ver perfil
+        </span>
       </div>
     </div>
   );
@@ -56,12 +69,14 @@ function ProducerCard({
 
 export function ClientDashboardPage() {
   const navigate = useNavigate();
+
   const [query, setQuery] = useState('');
   const [asyncResults, setAsyncResults] = useState<PublicProducerProfile[]>([]);
   const [asyncError, setAsyncError] = useState<string | null>(null);
   const [recommended, setRecommended] = useState<PublicProducerProfile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingRec, setIsLoadingRec] = useState(true);
+
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -72,10 +87,17 @@ export function ClientDashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (query.trim().length < 2) return;
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    if (query.trim().length < 2) {
+      return;
+    }
+
     debounceRef.current = setTimeout(() => {
       setIsSearching(true);
+
       searchProducersByName(query.trim())
         .then((found) => {
           setAsyncResults(found);
@@ -87,150 +109,227 @@ export function ClientDashboardPage() {
   }, [query]);
 
   const isActiveSearch = query.trim().length >= 2;
+
   const results = useMemo(
     () => (isActiveSearch ? asyncResults : []),
-    [isActiveSearch, asyncResults]
+    [asyncResults, isActiveSearch]
   );
+
   const searchError = useMemo(
     () => (isActiveSearch ? asyncError : null),
-    [isActiveSearch, asyncError]
+    [asyncError, isActiveSearch]
   );
+
   const showRecommended = !isActiveSearch;
 
   return (
-    <>
-      <RoleDashboard
-        title="Panel de cliente"
-        description="Bienvenido. Desde aquí podrás consultar productos, realizar pedidos y dar seguimiento a tus compras."
-      />
-
-      <div className="container py-3">
-        {/* Accesos rápidos */}
-        <h5 className="fw-semibold mb-3">¿Qué quieres hacer?</h5>
-        <div className="row g-3 mb-4">
-          <div className="col-sm-6 col-md-4">
-            <div
-              className="card border-0 shadow-sm h-100"
-              role="button"
-              tabIndex={0}
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/dashboard/cliente/productos')}
-              onKeyDown={(e) => e.key === 'Enter' && navigate('/dashboard/cliente/productos')}
-            >
-              <div className="card-body d-flex align-items-center gap-3">
-                <span style={{ fontSize: '2rem' }}>🛒</span>
-                <div>
-                  <h6 className="fw-bold mb-1">Catálogo de productos</h6>
-                  <p className="text-muted small mb-0">
-                    Explora, busca y filtra productos agrícolas disponibles.
-                  </p>
-                </div>
+    <main className="client-dashboard-page container-xxl">
+      <section className="bg-white border rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+        <div className="row align-items-center g-4">
+          <div className="col-12 col-lg">
+            <div className="d-flex align-items-start gap-3">
+              <div
+                className="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                style={{ width: '3.75rem', height: '3.75rem' }}
+                aria-hidden="true"
+              >
+                <i className="bi bi-person-check fs-3" />
               </div>
-              <div className="card-footer bg-transparent border-0">
-                <span className="btn btn-success btn-sm w-100">Ver catálogo →</span>
+
+              <div>
+                <p className="text-uppercase text-success fw-semibold small mb-1">
+                  Panel principal
+                </p>
+
+                <h1 className="h2 fw-bold mb-2">Bienvenido, cliente</h1>
+
+                <p className="text-secondary mb-0">
+                  Consulta productos agrícolas, encuentra productores y da seguimiento a tus pedidos
+                  desde un solo lugar.
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="col-sm-6 col-md-4">
-            <div
-              className="card border-0 shadow-sm h-100"
-              role="button"
-              tabIndex={0}
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/dashboard/cliente/pedidos')}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  navigate('/dashboard/cliente/pedidos');
-                }
-              }}
-            >
-              <div className="card-body d-flex align-items-center gap-3">
-                <span style={{ fontSize: '2rem' }}>📦</span>
-
-                <div>
-                  <h6 className="fw-bold mb-1">Mis pedidos</h6>
-                  <p className="text-muted small mb-0">
-                    Consulta el estado y detalle de tus pedidos realizados.
-                  </p>
-                </div>
-              </div>
-
-              <div className="card-footer bg-transparent border-0">
-                <span className="btn btn-success btn-sm w-100">Ver mis pedidos →</span>
-              </div>
+          <div className="col-12 col-lg-auto">
+            <div className="d-flex align-items-center gap-2 text-success small fw-semibold">
+              <i className="bi bi-shield-check fs-5" aria-hidden="true" />
+              <span>Acceso seguro a tu cuenta</span>
             </div>
           </div>
         </div>
+      </section>
 
-        <hr className="mb-4" />
+      <section className="mb-5" aria-labelledby="quick-actions-title">
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <p className="text-uppercase text-success fw-semibold small mb-1">Accesos rápidos</p>
 
-        {/* Buscador de productores */}
-        <h5 className="fw-semibold mb-2">Buscar productores</h5>
-        <div className="input-group mb-3" style={{ maxWidth: 480 }}>
-          <span className="input-group-text bg-white">🔍</span>
-          <input
-            type="search"
-            className="form-control"
-            placeholder="Buscar por nombre comercial…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoComplete="off"
-          />
-          {isSearching && (
-            <span className="input-group-text bg-white">
-              <span className="spinner-border spinner-border-sm text-success" />
-            </span>
-          )}
+            <h2 id="quick-actions-title" className="h4 fw-bold mb-0">
+              ¿Qué deseas realizar?
+            </h2>
+          </div>
         </div>
 
-        {isActiveSearch &&
-          (searchError ? (
-            <p className="text-muted small">{searchError}</p>
+        <div className="row g-4">
+          <div className="col-12 col-md-6">
+            <DashboardActionCard
+              icon="bi-bag-check"
+              title="Catálogo de productos"
+              eyebrow="Explora productos agrícolas disponibles."
+              description="Consulta, busca y filtra productos de acuerdo con tus necesidades."
+              buttonLabel="Ver catálogo"
+              buttonIcon="bi-grid"
+              onSelect={() => navigate('/dashboard/cliente/productos')}
+            />
+          </div>
+
+          <div className="col-12 col-md-6">
+            <DashboardActionCard
+              icon="bi-box-seam"
+              title="Mis pedidos"
+              eyebrow="Revisa tus compras realizadas."
+              description="Consulta el estado, detalle y seguimiento de cada pedido."
+              buttonLabel="Ver mis pedidos"
+              buttonIcon="bi-clipboard-check"
+              onSelect={() => navigate('/dashboard/cliente/pedidos')}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-5" aria-labelledby="producer-search-title">
+        <div className="bg-white border rounded-4 shadow-sm p-4 p-lg-5">
+          <div className="row align-items-end g-3">
+            <div className="col-12 col-lg">
+              <p className="text-uppercase text-success fw-semibold small mb-1">
+                Directorio agrícola
+              </p>
+
+              <h2 id="producer-search-title" className="h4 fw-bold mb-2">
+                Buscar productores
+              </h2>
+
+              <p className="text-secondary mb-0">Localiza productores por su nombre comercial.</p>
+            </div>
+
+            <div className="col-12 col-lg-6">
+              <div className="input-group">
+                <span className="input-group-text bg-white">
+                  <i className="bi bi-search text-success" aria-hidden="true" />
+                </span>
+
+                <input
+                  type="search"
+                  className="form-control"
+                  placeholder="Buscar por nombre comercial"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  autoComplete="off"
+                  aria-label="Buscar productor por nombre comercial"
+                />
+
+                {isSearching && (
+                  <span className="input-group-text bg-white">
+                    <span
+                      className="spinner-border spinner-border-sm text-success"
+                      aria-label="Buscando"
+                    />
+                  </span>
+                )}
+              </div>
+
+              <p className="form-text mb-0">
+                Escribe al menos dos caracteres para iniciar la búsqueda.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {isActiveSearch && (
+        <section className="mb-5" aria-live="polite">
+          {searchError ? (
+            <div className="alert alert-warning d-flex align-items-center gap-2 mb-0">
+              <i className="bi bi-exclamation-triangle-fill" aria-hidden="true" />
+              <span>{searchError}</span>
+            </div>
           ) : (
             <>
-              <p className="text-muted small mb-3">
-                {results.length} resultado{results.length !== 1 ? 's' : ''} para &ldquo;{query}
-                &rdquo;
-              </p>
-              <div className="row g-3">
-                {results.map((p) => (
-                  <div className="col-sm-6 col-md-4" key={p.id}>
-                    <ProducerCard profile={p} onClick={() => navigate(`/productores/${p.id}`)} />
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h2 className="h4 fw-bold mb-0">Resultados de búsqueda</h2>
+
+                <span className="badge text-bg-success rounded-pill">
+                  {results.length} resultado
+                  {results.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="row g-4">
+                {results.map((producer) => (
+                  <div className="col-12 col-md-6 col-xl-4" key={producer.id}>
+                    <ProducerCard
+                      profile={producer}
+                      onClick={() => navigate(`/productores/${producer.id}`)}
+                    />
                   </div>
                 ))}
               </div>
             </>
-          ))}
+          )}
+        </section>
+      )}
 
-        {showRecommended && (
-          <>
-            <h5 className="fw-semibold mt-2 mb-3">Productores recomendados</h5>
-            {isLoadingRec ? (
-              <div className="d-flex gap-3 flex-wrap">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="card" style={{ width: 200, height: 140, opacity: 0.4 }}>
-                    <div className="card-body placeholder-glow">
-                      <span className="placeholder col-8 mb-2 d-block" />
+      {showRecommended && (
+        <section aria-labelledby="recommended-producers-title">
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <div>
+              <p className="text-uppercase text-success fw-semibold small mb-1">
+                Selección destacada
+              </p>
+
+              <h2 id="recommended-producers-title" className="h4 fw-bold mb-0">
+                Productores recomendados
+              </h2>
+            </div>
+
+            <i className="bi bi-stars text-success fs-4" aria-hidden="true" />
+          </div>
+
+          {isLoadingRec ? (
+            <div className="row g-4">
+              {[...Array(3)].map((_, index) => (
+                <div className="col-12 col-md-6 col-xl-4" key={index}>
+                  <div className="card border-0 shadow-sm rounded-4 h-100">
+                    <div className="card-body p-4 placeholder-glow">
+                      <span className="placeholder col-3 rounded-circle d-inline-block mb-4" />
+                      <span className="placeholder col-8 d-block mb-3" />
+                      <span className="placeholder col-10 d-block mb-2" />
                       <span className="placeholder col-6 d-block" />
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : recommended.length === 0 ? (
-              <p className="text-muted small">Aún no hay productores registrados.</p>
-            ) : (
-              <div className="row g-3">
-                {recommended.map((p) => (
-                  <div className="col-sm-6 col-md-4" key={p.id}>
-                    <ProducerCard profile={p} onClick={() => navigate(`/productores/${p.id}`)} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </>
+                </div>
+              ))}
+            </div>
+          ) : recommended.length === 0 ? (
+            <div className="alert alert-light border d-flex align-items-center gap-2 mb-0">
+              <i className="bi bi-info-circle text-success fs-5" aria-hidden="true" />
+              <span>Aún no hay productores registrados.</span>
+            </div>
+          ) : (
+            <div className="row g-4">
+              {recommended.map((producer) => (
+                <div className="col-12 col-md-6 col-xl-4" key={producer.id}>
+                  <ProducerCard
+                    profile={producer}
+                    onClick={() => navigate(`/productores/${producer.id}`)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+    </main>
   );
 }

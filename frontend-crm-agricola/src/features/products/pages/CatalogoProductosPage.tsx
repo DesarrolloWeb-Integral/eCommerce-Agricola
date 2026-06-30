@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { ProductCatalogCard } from '../components/ProductCatalogCard';
+import { ProductDetailModal } from '../components/ProductDetailModal';
 import {
-  getProductosDisponibles,
   buscarProductos,
-  getProductosPorCategoria,
   getProductoDetalle,
+  getProductosDisponibles,
+  getProductosPorCategoria,
 } from '../services/producto.service';
-import type { Producto, ProductoDetalle, CategoriaProducto } from '../types/producto.types';
-import { CATEGORIAS, CATEGORIA_LABELS } from '../types/producto.types';
+import type { CategoriaProducto, Producto, ProductoDetalle } from '../types/producto.types';
+import { CATEGORIA_LABELS, CATEGORIAS } from '../types/producto.types';
 import { useCart } from '../../orders/hooks';
 
 export function CatalogoProductosPage() {
@@ -108,240 +111,196 @@ export function CatalogoProductosPage() {
   }
 
   return (
-    <div className="container py-4" style={{ maxWidth: 960 }}>
-      <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
-        <button
-          type="button"
-          className="btn btn-outline-secondary btn-sm"
-          onClick={() => navigate('/dashboard/cliente')}
-        >
-          ← Volver
-        </button>
-        <h2 className="mb-0">Catálogo de productos agrícolas</h2>
-
-        <button
-          type="button"
-          className="btn btn-success btn-sm ms-auto"
-          onClick={() => navigate('/dashboard/cliente/pedidos/nuevo')}
-        >
-          <i className="bi bi-cart3 me-2" aria-hidden="true" />
-          Carrito
-          {summary.totalItems > 0 && (
-            <span className="badge text-bg-light ms-2">{summary.totalItems}</span>
-          )}
-        </button>
-      </div>
-
-      {error && <div className="alert alert-danger">{error}</div>}
-      {cartMessage && <div className="alert alert-success">{cartMessage}</div>}
-
-      <div className="mb-3">
-        <input
-          type="search"
-          className="form-control"
-          placeholder="Buscar productos por nombre…"
-          value={busqueda}
-          onChange={(e) => {
-            setBusqueda(e.target.value);
-            setCategoriaActiva(null);
-          }}
-          maxLength={100}
-        />
-      </div>
-
-      <div className="d-flex flex-wrap gap-2 mb-4">
-        {CATEGORIAS.map((cat) => (
-          <button
-            key={cat}
-            className={`btn btn-sm ${categoriaActiva === cat ? 'btn-success' : 'btn-outline-success'}`}
-            onClick={() => handleCategoria(cat)}
-          >
-            {CATEGORIA_LABELS[cat]}
-          </button>
-        ))}
-        {categoriaActiva && (
-          <button
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => setCategoriaActiva(null)}
-          >
-            ✕ Limpiar filtro
-          </button>
-        )}
-      </div>
-
-      {(detalle || loadingDetalle) && (
-        <div
-          className="modal d-block"
-          style={{ background: 'rgba(0,0,0,0.5)' }}
-          onClick={() => setDetalle(null)}
-        >
-          <div className="modal-dialog modal-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{detalle?.nombre ?? 'Cargando…'}</h5>
-                <button className="btn-close" onClick={() => setDetalle(null)} />
+    <main className="container-xxl">
+      <section className="bg-white border rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+        <div className="row align-items-center g-4">
+          <div className="col-12 col-lg">
+            <div className="d-flex align-items-start gap-3">
+              <div
+                className="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                style={{ width: '3.75rem', height: '3.75rem' }}
+                aria-hidden="true"
+              >
+                <i className="bi bi-bag-check fs-3" />
               </div>
-              <div className="modal-body">
-                {loadingDetalle ? (
-                  <div className="text-center py-4">
-                    <div className="spinner-border text-success" />
-                  </div>
-                ) : (
-                  detalle && (
-                    <div className="row g-4">
-                      <div className="col-md-7">
-                        <span className="badge bg-secondary mb-2">
-                          {CATEGORIA_LABELS[detalle.categoria]}
-                        </span>
-                        <p className="text-muted">{detalle.descripcion}</p>
-                        <table className="table table-sm">
-                          <tbody>
-                            <tr>
-                              <th>Precio</th>
-                              <td className="fw-bold text-success">${detalle.precio.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                              <th>Cantidad disponible</th>
-                              <td>{detalle.cantidad} unidades</td>
-                            </tr>
-                            <tr>
-                              <th>Disponible</th>
-                              <td>
-                                <span
-                                  className={`badge ${detalle.disponible ? 'bg-success' : 'bg-danger'}`}
-                                >
-                                  {detalle.disponible ? 'Sí' : 'No'}
-                                </span>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className="col-md-5">
-                        <div className="card bg-light p-3">
-                          <h6 className="fw-bold mb-2">🌾 Productor</h6>
-                          <p className="mb-1 fw-semibold">{detalle.productor.businessName}</p>
-                          {detalle.productor.generalLocation && (
-                            <p className="mb-1 text-muted small">
-                              📍 {detalle.productor.generalLocation}
-                            </p>
-                          )}
-                          {detalle.productor.contactPhone && (
-                            <p className="mb-1 small">📞 {detalle.productor.contactPhone}</p>
-                          )}
-                          {detalle.productor.contactEmail && (
-                            <p className="mb-1 small">✉️ {detalle.productor.contactEmail}</p>
-                          )}
-                          <button
-                            className="btn btn-outline-success btn-sm mt-2"
-                            onClick={() => navigate(`/productores/${detalle.productor.id}`)}
-                          >
-                            Ver perfil del productor
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                )}
+
+              <div>
+                <p className="text-uppercase text-success fw-semibold small mb-1">
+                  Catálogo agrícola
+                </p>
+
+                <h1 className="h2 fw-bold mb-2">Productos disponibles</h1>
+
+                <p className="text-secondary mb-0">
+                  Busca productos, filtra por categoría y agrega al carrito lo que necesites.
+                </p>
               </div>
             </div>
           </div>
+
+          <div className="col-12 col-lg-auto">
+            <div className="d-flex flex-column flex-sm-row gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => navigate('/dashboard/cliente')}
+              >
+                <i className="bi bi-arrow-left me-2" aria-hidden="true" />
+                Volver
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={() => navigate('/dashboard/cliente/pedidos/nuevo')}
+              >
+                <i className="bi bi-cart3 me-2" aria-hidden="true" />
+                Carrito
+                {summary.totalItems > 0 && (
+                  <span className="badge text-bg-light ms-2">{summary.totalItems}</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {error && (
+        <div className="alert alert-danger d-flex align-items-center gap-2" role="alert">
+          <i className="bi bi-exclamation-triangle-fill" aria-hidden="true" />
+          <span>{error}</span>
         </div>
       )}
 
-      {isLoading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-success" />
-        </div>
-      ) : productos.length === 0 ? (
-        <div className="text-center py-5 text-muted">
-          <p className="fs-5">No se encontraron productos.</p>
-          {(busqueda || categoriaActiva) && (
-            <button
-              className="btn btn-outline-secondary btn-sm"
-              onClick={() => {
-                setBusqueda('');
-                setCategoriaActiva(null);
-              }}
-            >
-              Ver todos los productos
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="row g-3">
-          {productos.map((p) => (
-            <div key={p.id} className="col-sm-6 col-md-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-body d-flex flex-column">
-                  <span className="badge bg-secondary mb-2 align-self-start">
-                    {CATEGORIA_LABELS[p.categoria]}
-                  </span>
-                  <h6 className="card-title fw-bold">{p.nombre}</h6>
-                  <p
-                    className="card-text text-muted small flex-grow-1"
-                    style={{
-                      overflow: 'hidden',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {p.descripcion}
-                  </p>
-                  <div className="d-flex justify-content-between align-items-center mt-2">
-                    <span className="fs-5 fw-bold text-success">${p.precio.toFixed(2)}</span>
-                    <span className="text-muted small">{p.cantidad} uds.</span>
-                  </div>
-                  <div className="input-group input-group-sm mt-3">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      disabled={!p.disponible || p.cantidad <= 0 || getCantidad(p) <= 1}
-                      onClick={() => handleCantidadChange(p, getCantidad(p) - 1)}
-                    >
-                      <i className="bi bi-dash" aria-hidden="true" />
-                    </button>
-                    <input
-                      type="number"
-                      className="form-control text-center"
-                      min={1}
-                      max={p.cantidad}
-                      value={getCantidad(p)}
-                      disabled={!p.disponible || p.cantidad <= 0}
-                      onChange={(event) => handleCantidadChange(p, Number(event.target.value))}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      disabled={!p.disponible || p.cantidad <= 0 || getCantidad(p) >= p.cantidad}
-                      onClick={() => handleCantidadChange(p, getCantidad(p) + 1)}
-                    >
-                      <i className="bi bi-plus" aria-hidden="true" />
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn btn-success btn-sm mt-2"
-                    disabled={!p.disponible || p.cantidad <= 0}
-                    onClick={() => handleAddToCart(p)}
-                  >
-                    <i className="bi bi-cart-plus me-2" aria-hidden="true" />
-                    Agregar al carrito
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-success btn-sm mt-3"
-                    onClick={() => verDetalle(p.id)}
-                  >
-                    Ver detalle
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+      {cartMessage && (
+        <div className="alert alert-success d-flex align-items-center gap-2" role="alert">
+          <i className="bi bi-check2-circle" aria-hidden="true" />
+          <span>{cartMessage}</span>
         </div>
       )}
-    </div>
+
+      <section className="bg-white border rounded-4 shadow-sm p-4 mb-4" aria-label="Filtros">
+        <div className="row g-3 align-items-end">
+          <div className="col-12 col-lg">
+            <label htmlFor="product-search" className="form-label fw-semibold">
+              Buscar productos
+            </label>
+
+            <div className="input-group">
+              <span className="input-group-text bg-white">
+                <i className="bi bi-search text-success" aria-hidden="true" />
+              </span>
+
+              <input
+                id="product-search"
+                type="search"
+                className="form-control"
+                placeholder="Buscar productos por nombre..."
+                value={busqueda}
+                onChange={(event) => {
+                  setBusqueda(event.target.value);
+                  setCategoriaActiva(null);
+                }}
+                maxLength={100}
+              />
+            </div>
+          </div>
+
+          <div className="col-12">
+            <div className="d-flex flex-wrap gap-2">
+              {CATEGORIAS.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`btn btn-sm ${
+                    categoriaActiva === cat ? 'btn-success' : 'btn-outline-success'
+                  }`}
+                  onClick={() => handleCategoria(cat)}
+                >
+                  <i className="bi bi-tag me-2" aria-hidden="true" />
+                  {CATEGORIA_LABELS[cat]}
+                </button>
+              ))}
+
+              {categoriaActiva && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => setCategoriaActiva(null)}
+                >
+                  <i className="bi bi-x-lg me-2" aria-hidden="true" />
+                  Limpiar filtro
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {(detalle || loadingDetalle) && (
+        <ProductDetailModal
+          detalle={detalle}
+          isLoading={loadingDetalle}
+          onClose={() => setDetalle(null)}
+          onViewProducer={(producerId) => navigate(`/productores/${producerId}`)}
+        />
+      )}
+
+      {isLoading ? (
+        <div className="card border-0 shadow-sm rounded-4">
+          <div className="card-body text-center py-5">
+            <div className="spinner-border text-success mb-3" role="status">
+              <span className="visually-hidden">Cargando productos...</span>
+            </div>
+            <p className="text-secondary mb-0">Cargando productos...</p>
+          </div>
+        </div>
+      ) : productos.length === 0 ? (
+        <section className="card border-0 shadow-sm rounded-4">
+          <div className="card-body text-center p-4 p-lg-5">
+            <div
+              className="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style={{ width: '4rem', height: '4rem' }}
+              aria-hidden="true"
+            >
+              <i className="bi bi-search fs-2" />
+            </div>
+
+            <h2 className="h4 fw-bold mb-2">No se encontraron productos</h2>
+            <p className="text-secondary mb-4">
+              Intenta con otro término de búsqueda o limpia los filtros.
+            </p>
+
+            {(busqueda || categoriaActiva) && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  setBusqueda('');
+                  setCategoriaActiva(null);
+                }}
+              >
+                <i className="bi bi-arrow-counterclockwise me-2" aria-hidden="true" />
+                Ver todos los productos
+              </button>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section className="row g-4" aria-label="Productos disponibles">
+          {productos.map((producto) => (
+            <div key={producto.id} className="col-12 col-md-6 col-xl-4">
+              <ProductCatalogCard
+                producto={producto}
+                quantity={getCantidad(producto)}
+                onAddToCart={handleAddToCart}
+                onQuantityChange={handleCantidadChange}
+                onViewDetail={(id) => void verDetalle(id)}
+              />
+            </div>
+          ))}
+        </section>
+      )}
+    </main>
   );
 }

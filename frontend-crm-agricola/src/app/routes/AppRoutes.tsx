@@ -15,6 +15,7 @@ import { PublicRoute } from './PublicRoute';
 import { RoleRoute } from './RoleRoute';
 import { MisProductosPage, CatalogoProductosPage } from '../../features/products';
 import { CreateOrderPage, MyOrdersPage, OrdersForMyProductsPage } from '../../features/orders';
+import { AppShell } from '../../shared/components/layout/AppShell';
 
 export function AppRoutes() {
   return (
@@ -25,12 +26,17 @@ export function AppRoutes() {
       </Route>
 
       {/* Vista pública de productor — sin login */}
-      <Route path="/productores/:profileId" element={<PublicProducerPage />} />
+      <Route
+        path="/productores/:profileId"
+        element={
+          <AppShell>
+            <PublicProducerPage />
+          </AppShell>
+        }
+      />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardRedirect />} />
-
-        <Route path="/dashboard/cliente/productos" element={<CatalogoProductosPage />} />
 
         <Route path="/dashboard/cliente" element={<ClientDashboardPage />} />
 
