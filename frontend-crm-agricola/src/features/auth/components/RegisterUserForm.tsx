@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { PrivacyConsentSection } from './Privacyconsentsection';
 import type { RegisterUserData } from '../types';
+import {
+  validateSafeText,
+  validateTrimmedRequired,
+} from '../../../shared/validators/security.validators';
 
 interface RegisterUserFormProps {
   onRegister: (userData: RegisterUserData) => Promise<boolean>;
@@ -48,7 +52,7 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
       <div className="row g-4">
         <div className="col-12 col-md-6">
           <label htmlFor="name" className="form-label fw-semibold">
-            Nombre
+            Nombre <span className="text-danger">*</span>
           </label>
           <div className="input-group">
             <span className="input-group-text bg-light">
@@ -60,7 +64,18 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               className={`form-control ${errors.name ? 'is-invalid' : ''}`}
               placeholder="Ingresa tu nombre"
               autoComplete="given-name"
-              {...register('name', { required: 'El nombre es obligatorio.' })}
+              maxLength={100}
+              {...register('name', {
+                required: 'El nombre es obligatorio.',
+                maxLength: {
+                  value: 100,
+                  message: 'El nombre no puede superar los 100 caracteres.',
+                },
+                validate: {
+                  trimmed: (value) => validateTrimmedRequired(value, 'El nombre es obligatorio.'),
+                  safe: (value) => validateSafeText(value, 'El nombre'),
+                },
+              })}
             />
           </div>
           {errors.name && <div className="invalid-feedback d-block">{errors.name.message}</div>}
@@ -68,7 +83,7 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
 
         <div className="col-12 col-md-6">
           <label htmlFor="lastName" className="form-label fw-semibold">
-            Apellido
+            Apellido <span className="text-danger">*</span>
           </label>
           <div className="input-group">
             <span className="input-group-text bg-light">
@@ -80,7 +95,18 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
               placeholder="Ingresa tu apellido"
               autoComplete="family-name"
-              {...register('lastName', { required: 'El apellido es obligatorio.' })}
+              maxLength={100}
+              {...register('lastName', {
+                required: 'El apellido es obligatorio.',
+                maxLength: {
+                  value: 100,
+                  message: 'El apellido no puede superar los 100 caracteres.',
+                },
+                validate: {
+                  trimmed: (value) => validateTrimmedRequired(value, 'El apellido es obligatorio.'),
+                  safe: (value) => validateSafeText(value, 'El apellido'),
+                },
+              })}
             />
           </div>
           {errors.lastName && (
@@ -90,7 +116,7 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
 
         <div className="col-12 col-md-6">
           <label htmlFor="email" className="form-label fw-semibold">
-            Correo electrónico
+            Correo electrónico <span className="text-danger">*</span>
           </label>
           <div className="input-group">
             <span className="input-group-text bg-light">
@@ -102,8 +128,13 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               className={`form-control ${errors.email ? 'is-invalid' : ''}`}
               placeholder="correo@ejemplo.com"
               autoComplete="email"
+              maxLength={150}
               {...register('email', {
                 required: 'El correo electrónico es obligatorio.',
+                maxLength: {
+                  value: 150,
+                  message: 'El correo electrónico no puede superar los 150 caracteres.',
+                },
                 pattern: {
                   value: /^\S+@\S+\.\S+$/,
                   message: 'Ingresa un correo electrónico válido.',
@@ -116,7 +147,7 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
 
         <div className="col-12 col-md-6">
           <label htmlFor="phone" className="form-label fw-semibold">
-            Teléfono
+            Teléfono <span className="text-danger">*</span>
           </label>
           <div className="input-group">
             <span className="input-group-text bg-light">
@@ -144,7 +175,7 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
 
         <div className="col-12 col-md-6">
           <label htmlFor="role" className="form-label fw-semibold">
-            Rol
+            Rol <span className="text-danger">*</span>
           </label>
           <div className="input-group">
             <span className="input-group-text bg-light">
@@ -168,7 +199,7 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
 
         <div className="col-12 col-md-6">
           <label htmlFor="password" className="form-label fw-semibold">
-            Contraseña
+            Contraseña <span className="text-danger">*</span>
           </label>
           <div className="input-group">
             <span className="input-group-text bg-light">
@@ -180,12 +211,19 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               className={`form-control ${errors.password ? 'is-invalid' : ''}`}
               placeholder="Mínimo 8 caracteres"
               autoComplete="new-password"
+              maxLength={72}
               {...register('password', {
                 required: 'La contraseña es obligatoria.',
                 minLength: {
                   value: 8,
                   message: 'La contraseña debe tener al menos 8 caracteres.',
                 },
+                maxLength: {
+                  value: 72,
+                  message: 'La contraseña no puede superar los 72 caracteres.',
+                },
+                validate: (value) =>
+                  validateTrimmedRequired(value, 'La contraseña es obligatoria.'),
               })}
             />
           </div>

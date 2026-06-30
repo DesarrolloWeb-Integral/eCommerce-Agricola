@@ -1,32 +1,41 @@
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator'
+import { IsBoolean, IsEnum, IsInt, IsNumber, IsString, MaxLength, Min } from 'class-validator'
+import {
+  IsOptionalButNotNull,
+  IsSafeText,
+  IsTrimmedNotEmpty,
+} from 'src/shared/validation/security.validators'
 import { CategoriaProducto } from '../../../../domain/value-objects/categoria-producto.enum'
 
 export class EditarProductoDto {
-  @IsOptional()
+  @IsOptionalButNotNull()
   @IsString({ message: 'El nombre debe ser texto.' })
+  @IsTrimmedNotEmpty({ message: 'El nombre no puede estar vacio.' })
+  @IsSafeText({ message: 'El nombre no puede contener HTML o JavaScript.' })
   @MaxLength(150, { message: 'El nombre no puede superar los 150 caracteres.' })
   nombre?: string
 
-  @IsOptional()
+  @IsOptionalButNotNull()
   @IsString({ message: 'La descripción debe ser texto.' })
+  @IsTrimmedNotEmpty({ message: 'La descripción no puede estar vacia.' })
+  @IsSafeText({ message: 'La descripción no puede contener HTML o JavaScript.' })
   @MaxLength(1000, { message: 'La descripción no puede superar los 1000 caracteres.' })
   descripcion?: string
 
-  @IsOptional()
+  @IsOptionalButNotNull()
   @IsEnum(CategoriaProducto, { message: 'La categoría no es válida.' })
   categoria?: CategoriaProducto
 
-  @IsOptional()
+  @IsOptionalButNotNull()
   @IsNumber({}, { message: 'El precio debe ser un número.' })
   @Min(0.01, { message: 'El precio debe ser mayor a cero.' })
   precio?: number
 
-  @IsOptional()
-  @IsNumber({}, { message: 'La cantidad debe ser un número.' })
+  @IsOptionalButNotNull()
+  @IsInt({ message: 'La cantidad debe ser un número entero.' })
   @Min(0, { message: 'La cantidad no puede ser negativa.' })
   cantidad?: number
 
-  @IsOptional()
+  @IsOptionalButNotNull()
   @IsBoolean({ message: 'La disponibilidad debe ser verdadero o falso.' })
   disponible?: boolean
 }

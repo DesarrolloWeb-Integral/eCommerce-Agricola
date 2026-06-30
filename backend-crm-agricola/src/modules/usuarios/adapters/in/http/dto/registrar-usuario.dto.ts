@@ -1,14 +1,17 @@
-import { IsEmail, IsIn, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator'
+import { IsEmail, IsIn, IsString, Matches, MaxLength, MinLength } from 'class-validator'
+import { IsSafeText, IsTrimmedNotEmpty } from 'src/shared/validation/security.validators'
 import { RolUsuario } from 'src/modules/usuarios/domain/value-objects/rol-usuario.enum'
 
 export class RegistrarUsuarioDto {
   @IsString()
-  @IsNotEmpty()
+  @IsTrimmedNotEmpty({ message: 'El nombre es obligatorio.' })
+  @IsSafeText({ message: 'El nombre no puede contener HTML o JavaScript.' })
   @MaxLength(100)
   name!: string
 
   @IsString()
-  @IsNotEmpty()
+  @IsTrimmedNotEmpty({ message: 'El apellido es obligatorio.' })
+  @IsSafeText({ message: 'El apellido no puede contener HTML o JavaScript.' })
   @MaxLength(100)
   lastName!: string
 
@@ -23,6 +26,7 @@ export class RegistrarUsuarioDto {
   phone!: string
 
   @IsString()
+  @IsTrimmedNotEmpty({ message: 'La contraseña es obligatoria.' })
   @MinLength(8)
   @MaxLength(72)
   password!: string
