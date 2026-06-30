@@ -13,6 +13,7 @@ import { DashboardRedirect } from './DashboardRedirect';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
 import { RoleRoute } from './RoleRoute';
+import { MisProductosPage } from '../../features/products';
 
 export function AppRoutes() {
   return (
@@ -36,6 +37,8 @@ export function AppRoutes() {
         <Route path="/dashboard/proveedor/perfil" element={<ProducerProfilePage />} />
 
         <Route path="/dashboard/administrador" element={<AdminDashboardPage />} />
+
+        <Route path="/dashboard/proveedor/productos" element={<MisProductosPage />} />
 
         <Route element={<RoleRoute allowedRoles={['ADMINISTRADOR']} />}>
           <Route path="/usuarios" element={<GetUserByIdPage />} />

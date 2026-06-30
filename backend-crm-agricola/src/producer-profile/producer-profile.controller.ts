@@ -7,79 +7,58 @@ import {
   Param,
   Query,
   ParseUUIDPipe,
-  Request,
+  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common'
-import { Request as ExpressRequest } from 'express'
 import { ProducerProfileService } from './producer-profile.service'
 import { CreateProducerProfileDto, UpdateProducerProfileDto } from './dto/producer-profile.dto'
+import { JwtAuthGuard } from '../modules/auth/adapters/in/passport/jwt-auth.guard'
+import { CurrentUser } from '../modules/auth/adapters/in/http/decorators/current-user.decorator'
+import type { UsuarioAutenticado } from '../modules/auth/domain/entities/usuario-autenticado'
 
-interface JwtPayload {
-  id?: string
-  sub?: string
-}
-
-interface AuthenticatedRequest extends ExpressRequest {
-  user?: JwtPayload
-}
-
-/**
- * Rutas:
- *   POST   /producer-profiles                    → crear perfil
- *   PATCH  /producer-profiles/:id                → actualizar perfil
- *   GET    /producer-profiles/me                 → perfil propio (privado)
- *   GET    /producer-profiles/search?q=nombre    → buscar por nombre (público)
- *   GET    /producer-profiles/recommended        → listado recomendados (público)
- *   GET    /producer-profiles/:id/public         → perfil público por id
- *   GET    /producer-profiles/user/:userId/public → perfil público por userId
- */
 @Controller('producer-profiles')
 export class ProducerProfileController {
   constructor(private readonly service: ProducerProfileService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Request() req: AuthenticatedRequest, @Body() dto: CreateProducerProfileDto) {
-    const userId = req.user?.id ?? req.user?.sub ?? ''
-    return this.service.create(userId, dto)
+  create(@CurrentUser() user: UsuarioAutenticado, @Body() dto: CreateProducerProfileDto) {
+    return this.service.create(user.id, dto)
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Request() req: AuthenticatedRequest,
+    @CurrentUser() user: UsuarioAutenticado,
     @Body() dto: UpdateProducerProfileDto
   ) {
-    const userId = req.user?.id ?? req.user?.sub ?? ''
-    return this.service.update(id, userId, dto)
+    return this.service.update(id, user.id, dto)
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  findOwn(@Request() req: AuthenticatedRequest) {
-    const userId = req.user?.id ?? req.user?.sub ?? ''
-    return this.service.findOwn(userId)
+  findOwn(@CurrentUser() user: UsuarioAutenticado) {
+    return this.service.findOwn(user.id)
   }
 
-  /** Buscar productores por nombre — público, sin auth */
   @Get('search')
   search(@Query('q') q: string) {
     return this.service.searchByName(q ?? '')
   }
 
-  /** Productores recomendados — público, sin auth */
   @Get('recommended')
   recommended(@Query('limit') limit?: string) {
     return this.service.findRecommended(limit ? Number(limit) : 6)
   }
 
-  /** Vista pública por ID de perfil */
   @Get(':id/public')
   findPublicById(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findPublicById(id)
   }
 
-  /** Vista pública por userId */
   @Get('user/:userId/public')
   findPublicByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.service.findPublicByUserId(userId)

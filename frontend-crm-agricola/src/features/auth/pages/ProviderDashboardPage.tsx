@@ -14,6 +14,7 @@ export function ProviderDashboardPage() {
         <button type="button" onClick={() => navigate('/dashboard/proveedor/perfil')}>
           Gestionar mi perfil de productor
         </button>
+        <button onClick={() => navigate('/dashboard/proveedor/productos')}>Mis productos</button>
       </div>
     </>
   );
