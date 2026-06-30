@@ -43,3 +43,7 @@ export async function getProductosPorCategoria(categoria: CategoriaProducto): Pr
 export async function getProductoDetalle(id: string): Promise<ProductoDetalle> {
   return apiClient<ProductoDetalle>(`/productos/${id}`);
 }
+
+export async function getProductosPorProductor(producerProfileId: string): Promise<Producto[]> {
+  return apiClient<Producto[]>(`/productos/productor/${producerProfileId}`);
+}
