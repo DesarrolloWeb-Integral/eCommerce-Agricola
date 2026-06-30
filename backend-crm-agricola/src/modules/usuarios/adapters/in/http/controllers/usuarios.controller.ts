@@ -15,6 +15,7 @@ import {
 
 import { EditarUsuarioDto } from '../dto/editar-usuario.dto'
 import { RegistrarUsuarioDto } from '../dto/registrar-usuario.dto'
+import { UsuarioResponseDto } from '../dto/usuario-responde.dto'
 import { BuscarUsuarioPorEmailUseCase } from '../../../../application/use-cases/buscar-usuario-por-email.use-case'
 import { BuscarUsuarioPorIdUseCase } from '../../../../application/use-cases/buscar-usuario-por-id.use-case'
 import { BuscarUsuarioPorTelefonoUseCase } from '../../../../application/use-cases/buscar-usuario-por-telefono.use-case'
@@ -29,18 +30,6 @@ import type { UsuarioAutenticado } from 'src/modules/auth/domain/entities/usuari
 import { RolesGuard } from 'src/modules/auth/adapters/in/passport/roles.guard'
 import { Roles } from 'src/modules/auth/adapters/in/http/decorators/roles.decorator'
 import { RolUsuario } from 'src/modules/usuarios/domain/value-objects/rol-usuario.enum'
-
-interface UsuarioResponse {
-  id: string
-  name: string
-  lastName: string
-  email: string
-  phone: string
-  role: string
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
-}
 
 interface RegistroUsuarioResponse {
   id: string
@@ -87,19 +76,19 @@ export class UsuariosController {
   @Get('buscar/email/:email')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RolUsuario.ADMINISTRADOR)
-  async buscarPorEmail(@Param('email') email: string): Promise<UsuarioResponse> {
+  async buscarPorEmail(@Param('email') email: string): Promise<UsuarioResponseDto> {
     const usuario = await this.buscarUsuarioPorEmailUseCase.execute(email)
 
-    return this.toResponse(usuario)
+    return UsuarioResponseDto.fromDomain(usuario)
   }
 
   @Get('buscar/telefono/:phone')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RolUsuario.ADMINISTRADOR)
-  async buscarPorTelefono(@Param('phone') phone: string): Promise<UsuarioResponse> {
+  async buscarPorTelefono(@Param('phone') phone: string): Promise<UsuarioResponseDto> {
     const usuario = await this.buscarUsuarioPorTelefonoUseCase.execute(phone)
 
-    return this.toResponse(usuario)
+    return UsuarioResponseDto.fromDomain(usuario)
   }
 
   @Get(':id')
@@ -107,10 +96,10 @@ export class UsuariosController {
   @Roles(RolUsuario.ADMINISTRADOR)
   async buscarPorId(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string
-  ): Promise<UsuarioResponse> {
+  ): Promise<UsuarioResponseDto> {
     const usuario = await this.buscarUsuarioPorIdUseCase.execute(id)
 
-    return this.toResponse(usuario)
+    return UsuarioResponseDto.fromDomain(usuario)
   }
 
   @Patch(':id')
@@ -119,7 +108,7 @@ export class UsuariosController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() editarUsuarioDto: EditarUsuarioDto,
     @CurrentUser() usuarioAutenticado: UsuarioAutenticado
-  ): Promise<UsuarioResponse> {
+  ): Promise<UsuarioResponseDto> {
     if (usuarioAutenticado.id !== id && usuarioAutenticado.role !== RolUsuario.ADMINISTRADOR) {
       throw new ForbiddenException('No tienes permiso para editar el perfil de otro usuario.')
     }
@@ -134,7 +123,7 @@ export class UsuariosController {
 
     const usuario = await this.editarUsuarioUseCase.execute(input)
 
-    return this.toResponse(usuario)
+    return UsuarioResponseDto.fromDomain(usuario)
   }
 
   @Delete(':id')
@@ -152,30 +141,6 @@ export class UsuariosController {
 
     return {
       message: 'Usuario desactivado correctamente.',
-    }
-  }
-
-  private toResponse(usuario: {
-    id: string
-    name: string
-    lastName: string
-    email: string
-    phone: string
-    role: string
-    isActive: boolean
-    createdAt: Date
-    updatedAt: Date
-  }): UsuarioResponse {
-    return {
-      id: usuario.id,
-      name: usuario.name,
-      lastName: usuario.lastName,
-      email: usuario.email,
-      phone: usuario.phone,
-      role: usuario.role,
-      isActive: usuario.isActive,
-      createdAt: usuario.createdAt,
-      updatedAt: usuario.updatedAt,
     }
   }
 }
