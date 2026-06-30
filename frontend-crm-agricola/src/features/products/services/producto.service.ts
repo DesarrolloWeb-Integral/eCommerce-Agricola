@@ -1,5 +1,5 @@
 import { apiClient } from '../../../services/api-client';
-import type { Producto } from '../types/producto.types';
+import type { Producto, ProductoDetalle, CategoriaProducto } from '../types/producto.types';
 
 export async function registrarProducto(data: object): Promise<Producto> {
   return apiClient<Producto>('/productos', {
@@ -25,9 +25,7 @@ export async function eliminarProducto(id: string): Promise<void> {
 }
 
 export async function getMisProductos(): Promise<Producto[]> {
-  return apiClient<Producto[]>('/productos/mis-productos', {
-    requiresAuth: true,
-  });
+  return apiClient<Producto[]>('/productos/mis-productos', { requiresAuth: true });
 }
 
 export async function getProductosDisponibles(): Promise<Producto[]> {
@@ -36,4 +34,12 @@ export async function getProductosDisponibles(): Promise<Producto[]> {
 
 export async function buscarProductos(q: string): Promise<Producto[]> {
   return apiClient<Producto[]>(`/productos/buscar?q=${encodeURIComponent(q)}`);
+}
+
+export async function getProductosPorCategoria(categoria: CategoriaProducto): Promise<Producto[]> {
+  return apiClient<Producto[]>(`/productos/categoria/${categoria}`);
+}
+
+export async function getProductoDetalle(id: string): Promise<ProductoDetalle> {
+  return apiClient<ProductoDetalle>(`/productos/${id}`);
 }

@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductoForm } from '../components/ProductoForm';
 import { getMisProductos, eliminarProducto } from '../services/producto.service';
+import { getOwnProducerProfile } from '../../../producer-profile';
 import type { Producto } from '../types/producto.types';
+import { CATEGORIA_LABELS } from '../types/producto.types';
 
 export function MisProductosPage() {
   const navigate = useNavigate();
@@ -11,23 +13,31 @@ export function MisProductosPage() {
   const [editando, setEditando] = useState<Producto | null>(null);
   const [creando, setCreando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tienePerfil, setTienePerfil] = useState<boolean | null>(null);
 
   const cargar = useCallback(() => {
-    setIsLoading(true);
     getMisProductos()
       .then(setProductos)
-      .catch(() => setError('No se pudieron cargar los productos.'))
-      .finally(() => setIsLoading(false));
+      .catch(() => setError('No se pudieron cargar los productos.'));
   }, []);
 
   useEffect(() => {
-    getMisProductos()
-      .then((data) => {
-        setProductos(data);
-        setIsLoading(false);
+    // Verificar si tiene perfil primero
+    getOwnProducerProfile()
+      .then(() => {
+        setTienePerfil(true);
+        getMisProductos()
+          .then((data) => {
+            setProductos(data);
+            setIsLoading(false);
+          })
+          .catch(() => {
+            setError('No se pudieron cargar los productos.');
+            setIsLoading(false);
+          });
       })
       .catch(() => {
-        setError('No se pudieron cargar los productos.');
+        setTienePerfil(false);
         setIsLoading(false);
       });
   }, []);
@@ -46,6 +56,43 @@ export function MisProductosPage() {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al eliminar.');
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center py-5">
+        <div className="spinner-border text-success" role="status" />
+      </div>
+    );
+  }
+
+  // Sin perfil — bloquear acceso
+  if (tienePerfil === false) {
+    return (
+      <div className="container py-5" style={{ maxWidth: 520 }}>
+        <div className="card border-warning shadow-sm">
+          <div className="card-body text-center py-5">
+            <div style={{ fontSize: '3rem' }}>🏪</div>
+            <h4 className="fw-bold mt-3 mb-2">Primero configura tu perfil</h4>
+            <p className="text-muted mb-4">
+              Necesitas crear tu perfil de productor antes de poder registrar productos.
+            </p>
+            <button
+              className="btn btn-success px-4"
+              onClick={() => navigate('/dashboard/proveedor/perfil')}
+            >
+              Crear perfil de productor
+            </button>
+            <button
+              className="btn btn-outline-secondary ms-2 px-4"
+              onClick={() => navigate('/dashboard/proveedor')}
+            >
+              Volver
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -79,11 +126,7 @@ export function MisProductosPage() {
         </button>
       )}
 
-      {isLoading ? (
-        <div className="text-center py-4">
-          <div className="spinner-border text-success" />
-        </div>
-      ) : productos.length === 0 ? (
+      {productos.length === 0 ? (
         <p className="text-muted">Aún no tienes productos registrados.</p>
       ) : (
         <div className="table-responsive">
@@ -103,7 +146,7 @@ export function MisProductosPage() {
                 <tr key={p.id}>
                   <td>{p.nombre}</td>
                   <td>
-                    <span className="badge bg-secondary">{p.categoria}</span>
+                    <span className="badge bg-secondary">{CATEGORIA_LABELS[p.categoria]}</span>
                   </td>
                   <td>${p.precio.toFixed(2)}</td>
                   <td>{p.cantidad}</td>
