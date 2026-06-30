@@ -177,6 +177,16 @@ export class ProductosController {
     }
   }
 
+  /** Productos de un productor específico — público, usado en el perfil público */
+  @Get('productor/:producerProfileId')
+  async porProductor(
+    @Param('producerProfileId', ParseUUIDPipe) producerProfileId: string
+  ): Promise<ProductoResponse[]> {
+    const productos = await this.listarProductosUseCase.ejecutarPorProductor(producerProfileId)
+    // Solo se muestran los disponibles al público
+    return productos.filter((p) => p.disponible).map((p) => this.toResponse(p))
+  }
+
   private toResponse(p: {
     id: string
     producerProfileId: string

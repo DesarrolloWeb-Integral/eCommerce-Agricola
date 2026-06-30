@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { PublicProducerProfile } from '../types/producer-profile.types';
 import { getPublicProducerProfile } from '../services/producer-profile.service';
+import { getProductosPorProductor } from '../../features/products/services/producto.service';
+import { CATEGORIA_LABELS } from '../../features/products/types/producto.types';
+import type { Producto } from '../../features/products/types/producto.types';
 
 interface Props {
   profileId: string;
@@ -9,10 +12,13 @@ interface Props {
 /**
  * Vista pública del perfil de un productor.
  * No muestra ningún dato privado (internalNotes, userId, etc.).
+ * Incluye el catálogo de productos disponibles de ese productor.
  */
 export function PublicProducerProfileView({ profileId }: Props) {
   const [profile, setProfile] = useState<PublicProducerProfile | null>(null);
+  const [productos, setProductos] = useState<Producto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingProductos, setIsLoadingProductos] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,6 +26,13 @@ export function PublicProducerProfileView({ profileId }: Props) {
       .then(setProfile)
       .catch((err) => setError(err.message ?? 'No se pudo cargar el perfil.'))
       .finally(() => setIsLoading(false));
+  }, [profileId]);
+
+  useEffect(() => {
+    getProductosPorProductor(profileId)
+      .then(setProductos)
+      .catch(() => setProductos([]))
+      .finally(() => setIsLoadingProductos(false));
   }, [profileId]);
 
   if (isLoading) {
@@ -104,6 +117,54 @@ export function PublicProducerProfileView({ profileId }: Props) {
               ))}
             </ul>
           </div>
+        </div>
+      )}
+
+      {/* ── Productos del productor ── */}
+      <h2 className="h5 fw-semibold mb-3">Productos disponibles</h2>
+
+      {isLoadingProductos ? (
+        <div className="d-flex gap-3 flex-wrap">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="card" style={{ width: 200, height: 140, opacity: 0.4 }}>
+              <div className="card-body placeholder-glow">
+                <span className="placeholder col-8 mb-2 d-block" />
+                <span className="placeholder col-6 d-block" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : productos.length === 0 ? (
+        <p className="text-muted small">Este productor aún no tiene productos disponibles.</p>
+      ) : (
+        <div className="row g-3 mb-4">
+          {productos.map((p) => (
+            <div key={p.id} className="col-sm-6 col-md-4">
+              <div className="card h-100 shadow-sm">
+                <div className="card-body d-flex flex-column">
+                  <span className="badge bg-secondary mb-2 align-self-start">
+                    {CATEGORIA_LABELS[p.categoria]}
+                  </span>
+                  <h6 className="card-title fw-bold">{p.nombre}</h6>
+                  <p
+                    className="card-text text-muted small flex-grow-1"
+                    style={{
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {p.descripcion}
+                  </p>
+                  <div className="d-flex justify-content-between align-items-center mt-2">
+                    <span className="fs-6 fw-bold text-success">${p.precio.toFixed(2)}</span>
+                    <span className="text-muted small">{p.cantidad} uds.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

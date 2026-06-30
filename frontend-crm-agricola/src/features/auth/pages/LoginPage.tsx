@@ -64,7 +64,7 @@ export function LoginPage() {
                   Plataforma agrícola
                 </p>
 
-                <h1 className="display-5 fw-bold mb-4">Bienvenido de nuevo.</h1>
+                <h1 className="display-5 fw-bold mb-4">Bienvenido de nuevo</h1>
 
                 <p className="fs-5 text-white-50 mb-0">
                   Inicia sesión para consultar productos agrícolas, gestionar tus pedidos y
