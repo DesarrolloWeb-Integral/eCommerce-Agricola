@@ -134,14 +134,24 @@ export function ProducerProfileForm() {
               <label htmlFor="contactPhone" className="form-label">
                 Teléfono
               </label>
-              <input type="tel" placeholder="+52 477 123 4567" {...field('contactPhone')} />
+              <input
+                type="tel"
+                maxLength={20}
+                placeholder="+52 477 123 4567"
+                {...field('contactPhone')}
+              />
               {errors.contactPhone && <div className="invalid-feedback">{errors.contactPhone}</div>}
             </div>
             <div className="col-md-6">
               <label htmlFor="contactEmail" className="form-label">
                 Correo de contacto
               </label>
-              <input type="email" placeholder="ventas@mirancho.com" {...field('contactEmail')} />
+              <input
+                type="email"
+                maxLength={254}
+                placeholder="ventas@mirancho.com"
+                {...field('contactEmail')}
+              />
               {errors.contactEmail && <div className="invalid-feedback">{errors.contactEmail}</div>}
               <div className="form-text">Puede ser diferente al correo de tu cuenta.</div>
             </div>
@@ -159,6 +169,7 @@ export function ProducerProfileForm() {
                 <input
                   id={`social-${platform}`}
                   type="url"
+                  maxLength={300}
                   placeholder={`https://${platform}.com/…`}
                   value={form.socialLinks[platform] ?? ''}
                   onChange={(e) => handleSocialLinkChange(platform, e.target.value)}
