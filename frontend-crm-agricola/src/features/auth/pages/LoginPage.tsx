@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useLoginUser } from '../hooks/useLoginUser';
 import type { LoginUserData } from '../types';
+import { validateTrimmedRequired } from '../../../shared/validators/security.validators';
 
 import '../../../styles/LoginPage.css';
 
@@ -106,7 +107,7 @@ export function LoginPage() {
                         <div className="row g-4">
                           <div className="col-12">
                             <label htmlFor="email" className="form-label fw-semibold">
-                              Correo electrónico
+                              Correo electrónico <span className="text-danger">*</span>
                             </label>
 
                             <div className="input-group">
@@ -120,8 +121,14 @@ export function LoginPage() {
                                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                                 placeholder="correo@ejemplo.com"
                                 autoComplete="email"
+                                maxLength={150}
                                 {...register('email', {
                                   required: 'El correo electrónico es obligatorio.',
+                                  maxLength: {
+                                    value: 150,
+                                    message:
+                                      'El correo electrónico no puede superar los 150 caracteres.',
+                                  },
                                   pattern: {
                                     value: /^\S+@\S+\.\S+$/,
                                     message: 'Ingresa un correo electrónico válido.',
@@ -137,7 +144,7 @@ export function LoginPage() {
 
                           <div className="col-12">
                             <label htmlFor="password" className="form-label fw-semibold">
-                              Contraseña
+                              Contraseña <span className="text-danger">*</span>
                             </label>
 
                             <div className="input-group">
@@ -151,8 +158,19 @@ export function LoginPage() {
                                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
                                 placeholder="Ingresa tu contraseña"
                                 autoComplete="current-password"
+                                maxLength={72}
                                 {...register('password', {
                                   required: 'La contraseña es obligatoria.',
+                                  minLength: {
+                                    value: 8,
+                                    message: 'La contraseña debe tener al menos 8 caracteres.',
+                                  },
+                                  maxLength: {
+                                    value: 72,
+                                    message: 'La contraseña no puede superar los 72 caracteres.',
+                                  },
+                                  validate: (value) =>
+                                    validateTrimmedRequired(value, 'La contraseña es obligatoria.'),
                                 })}
                               />
 

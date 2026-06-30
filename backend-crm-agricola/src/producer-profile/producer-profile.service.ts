@@ -28,10 +28,11 @@ export class ProducerProfileService {
     if (existing) {
       throw new ConflictException('Ya tienes un perfil de productor registrado.')
     }
+    const normalizedDto = this.normalizeCreateDto(dto)
     const profile = this.profileRepository.create({
       userId,
-      ...dto,
-      socialLinks: dto.socialLinks ?? {},
+      ...normalizedDto,
+      socialLinks: normalizedDto.socialLinks ?? {},
     })
     const saved = await this.profileRepository.save(profile)
     return this.toPrivateDto(saved)
@@ -46,7 +47,7 @@ export class ProducerProfileService {
   ): Promise<PrivateProducerProfileDto> {
     const profile = await this.findEntityOrFail(profileId)
     this.assertOwnership(profile, requestingUserId)
-    Object.assign(profile, dto)
+    Object.assign(profile, this.normalizeUpdateDto(dto))
     const saved = await this.profileRepository.save(profile)
     return this.toPrivateDto(saved)
   }
@@ -125,6 +126,46 @@ export class ProducerProfileService {
     if (profile.userId !== requestingUserId) {
       throw new ForbiddenException('No tienes permiso para modificar este perfil.')
     }
+  }
+
+  private normalizeCreateDto(dto: CreateProducerProfileDto): CreateProducerProfileDto {
+    return {
+      ...dto,
+      businessName: dto.businessName.trim(),
+      description: dto.description?.trim(),
+      generalLocation: dto.generalLocation?.trim(),
+      contactPhone: dto.contactPhone?.trim(),
+      contactEmail: dto.contactEmail?.trim().toLowerCase(),
+      socialLinks: this.normalizeSocialLinks(dto.socialLinks),
+      internalNotes: dto.internalNotes?.trim(),
+    }
+  }
+
+  private normalizeUpdateDto(dto: UpdateProducerProfileDto): UpdateProducerProfileDto {
+    const normalizedDto: UpdateProducerProfileDto = { ...dto }
+
+    if (dto.businessName !== undefined) normalizedDto.businessName = dto.businessName.trim()
+    if (dto.description !== undefined) normalizedDto.description = dto.description.trim()
+    if (dto.generalLocation !== undefined)
+      normalizedDto.generalLocation = dto.generalLocation.trim()
+    if (dto.contactPhone !== undefined) normalizedDto.contactPhone = dto.contactPhone.trim()
+    if (dto.contactEmail !== undefined)
+      normalizedDto.contactEmail = dto.contactEmail.trim().toLowerCase()
+    if (dto.socialLinks !== undefined)
+      normalizedDto.socialLinks = this.normalizeSocialLinks(dto.socialLinks)
+    if (dto.internalNotes !== undefined) normalizedDto.internalNotes = dto.internalNotes.trim()
+
+    return normalizedDto
+  }
+
+  private normalizeSocialLinks(
+    socialLinks?: Record<string, string> | null
+  ): Record<string, string> | undefined {
+    if (!socialLinks) return undefined
+
+    return Object.fromEntries(
+      Object.entries(socialLinks).map(([platform, url]) => [platform, url.trim()])
+    )
   }
 
   private toPublicDto(p: ProducerProfile): PublicProducerProfileDto {

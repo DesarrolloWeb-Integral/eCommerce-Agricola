@@ -12,6 +12,23 @@ type ApiRequestOptions = Omit<RequestInit, 'body'> & {
   retryAfterRefresh?: boolean;
 };
 
+function getApiErrorMessage(data: unknown): string {
+  if (typeof data !== 'object' || data === null || !('message' in data)) {
+    return 'Ocurrió un error al realizar la solicitud.';
+  }
+
+  const { message } = data as { message: unknown };
+
+  if (typeof message === 'string') return message;
+
+  if (Array.isArray(message)) {
+    const messages = message.filter((item): item is string => typeof item === 'string');
+    if (messages.length > 0) return messages.join(' ');
+  }
+
+  return 'Ocurrió un error al realizar la solicitud.';
+}
+
 export async function apiClient<TResponse>(
   endpoint: string,
   options: ApiRequestOptions = {}
@@ -49,15 +66,7 @@ export async function apiClient<TResponse>(
   const data: unknown = await response.json();
 
   if (!response.ok) {
-    const errorMessage =
-      typeof data === 'object' &&
-      data !== null &&
-      'message' in data &&
-      typeof data.message === 'string'
-        ? data.message
-        : 'Ocurrió un error al realizar la solicitud.';
-
-    throw new Error(errorMessage);
+    throw new Error(getApiErrorMessage(data));
   }
 
   return data as TResponse;

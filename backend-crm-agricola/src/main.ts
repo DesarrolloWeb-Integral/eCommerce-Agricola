@@ -19,6 +19,11 @@ async function bootstrap(): Promise<void> {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
+      validationError: {
+        target: false,
+        value: false,
+      },
     })
   )
 

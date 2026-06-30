@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -45,6 +46,17 @@ function getCookieValue(request: Request, cookieName: string): string | null {
   return typeof cookieValue === 'string' ? cookieValue : null
 }
 
+function assertEmptyBody(body: unknown): void {
+  if (body === undefined || body === null) return
+
+  const hasInvalidBody =
+    typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length > 0
+
+  if (hasInvalidBody) {
+    throw new BadRequestException('No se permiten campos adicionales.')
+  }
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -76,9 +88,12 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refrescarToken(
+    @Body() body: unknown,
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response
   ): Promise<{ message: string }> {
+    assertEmptyBody(body)
+
     const refreshToken = getCookieValue(request, REFRESH_TOKEN_COOKIE_NAME)
 
     if (!refreshToken) {
@@ -107,9 +122,12 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async cerrarSesion(
+    @Body() body: unknown,
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response
   ): Promise<{ message: string }> {
+    assertEmptyBody(body)
+
     const refreshToken = getCookieValue(request, REFRESH_TOKEN_COOKIE_NAME)
 
     try {
