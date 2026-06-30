@@ -9,6 +9,15 @@ export const CATEGORIAS: CategoriaProducto[] = [
   'OTROS',
 ];
 
+export const CATEGORIA_LABELS: Record<CategoriaProducto, string> = {
+  FRUTAS: '🍎 Frutas',
+  VERDURAS: '🥦 Verduras',
+  GRANOS: '🌾 Granos',
+  LACTEOS: '🥛 Lácteos',
+  CARNES: '🥩 Carnes',
+  OTROS: '📦 Otros',
+};
+
 export interface Producto {
   id: string;
   producerProfileId: string;
@@ -20,6 +29,17 @@ export interface Producto {
   disponible: boolean;
   creadoEn: string;
   actualizadoEn: string;
+}
+
+export interface ProductoDetalle extends Producto {
+  productor: {
+    id: string;
+    businessName: string;
+    generalLocation: string | null;
+    contactPhone: string | null;
+    contactEmail: string | null;
+    socialLinks: Record<string, string>;
+  };
 }
 
 export interface ProductoFormData {

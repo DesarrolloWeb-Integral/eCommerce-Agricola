@@ -64,7 +64,6 @@ export function ClientDashboardPage() {
   const [isLoadingRec, setIsLoadingRec] = useState(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Recomendados al montar — setState solo en .then/.catch (async callback)
   useEffect(() => {
     getRecommendedProducers(6)
       .then((data) => setRecommended(data))
@@ -72,14 +71,9 @@ export function ClientDashboardPage() {
       .finally(() => setIsLoadingRec(false));
   }, []);
 
-  // Búsqueda con debounce — setState solo dentro del callback async del timer
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    // Si el query es corto, el debounce simplemente no se lanza;
-    // los valores derivados los calcula useMemo abajo (sin setState en efecto)
     if (query.trim().length < 2) return;
-
     debounceRef.current = setTimeout(() => {
       setIsSearching(true);
       searchProducersByName(query.trim())
@@ -92,7 +86,6 @@ export function ClientDashboardPage() {
     }, 400);
   }, [query]);
 
-  // ✅ Derivación sin setState — useMemo en lugar de useEffect
   const isActiveSearch = query.trim().length >= 2;
   const results = useMemo(
     () => (isActiveSearch ? asyncResults : []),
@@ -102,7 +95,6 @@ export function ClientDashboardPage() {
     () => (isActiveSearch ? asyncError : null),
     [isActiveSearch, asyncError]
   );
-
   const showRecommended = !isActiveSearch;
 
   return (
@@ -112,8 +104,39 @@ export function ClientDashboardPage() {
         description="Bienvenido. Desde aquí podrás consultar productos, realizar pedidos y dar seguimiento a tus compras."
       />
 
-      <div style={{ padding: '0 1rem 2rem' }}>
-        <h2 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Buscar productores</h2>
+      <div className="container py-3">
+        {/* Accesos rápidos */}
+        <h5 className="fw-semibold mb-3">¿Qué quieres hacer?</h5>
+        <div className="row g-3 mb-4">
+          <div className="col-sm-6 col-md-4">
+            <div
+              className="card border-0 shadow-sm h-100"
+              role="button"
+              tabIndex={0}
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate('/dashboard/cliente/productos')}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('/dashboard/cliente/productos')}
+            >
+              <div className="card-body d-flex align-items-center gap-3">
+                <span style={{ fontSize: '2rem' }}>🛒</span>
+                <div>
+                  <h6 className="fw-bold mb-1">Catálogo de productos</h6>
+                  <p className="text-muted small mb-0">
+                    Explora, busca y filtra productos agrícolas disponibles.
+                  </p>
+                </div>
+              </div>
+              <div className="card-footer bg-transparent border-0">
+                <span className="btn btn-success btn-sm w-100">Ver catálogo →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="mb-4" />
+
+        {/* Buscador de productores */}
+        <h5 className="fw-semibold mb-2">Buscar productores</h5>
         <div className="input-group mb-3" style={{ maxWidth: 480 }}>
           <span className="input-group-text bg-white">🔍</span>
           <input
@@ -131,33 +154,28 @@ export function ClientDashboardPage() {
           )}
         </div>
 
-        {isActiveSearch && (
-          <>
-            {searchError ? (
-              <p className="text-muted small">{searchError}</p>
-            ) : (
-              <>
-                <p className="text-muted small mb-3">
-                  {results.length} resultado{results.length !== 1 ? 's' : ''} para &ldquo;{query}
-                  &rdquo;
-                </p>
-                <div className="row g-3">
-                  {results.map((p) => (
-                    <div className="col-sm-6 col-md-4" key={p.id}>
-                      <ProducerCard profile={p} onClick={() => navigate(`/productores/${p.id}`)} />
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </>
-        )}
+        {isActiveSearch &&
+          (searchError ? (
+            <p className="text-muted small">{searchError}</p>
+          ) : (
+            <>
+              <p className="text-muted small mb-3">
+                {results.length} resultado{results.length !== 1 ? 's' : ''} para &ldquo;{query}
+                &rdquo;
+              </p>
+              <div className="row g-3">
+                {results.map((p) => (
+                  <div className="col-sm-6 col-md-4" key={p.id}>
+                    <ProducerCard profile={p} onClick={() => navigate(`/productores/${p.id}`)} />
+                  </div>
+                ))}
+              </div>
+            </>
+          ))}
 
         {showRecommended && (
           <>
-            <h3 style={{ fontSize: '1rem', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
-              Productores recomendados
-            </h3>
+            <h5 className="fw-semibold mt-2 mb-3">Productores recomendados</h5>
             {isLoadingRec ? (
               <div className="d-flex gap-3 flex-wrap">
                 {[...Array(3)].map((_, i) => (
