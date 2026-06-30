@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ILike, Repository } from 'typeorm'
 import { Producto } from '../../../../../domain/entities/producto'
+import { CategoriaProducto } from '../../../../../domain/value-objects/categoria-producto.enum'
 import { ProductoRepositoryPort } from '../../../../../ports/out/producto-repository.port'
 import { ProductoEntity } from '../entities/producto.entity'
 import { ProductoMapper } from '../mappers/producto.mapper'
@@ -41,6 +42,14 @@ export class TypeormProductoRepository implements ProductoRepositoryPort {
       take: 30,
     })
     return entities.map((entity) => ProductoMapper.toDomain(entity)) // línea 43
+  }
+
+  async findByCategoria(categoria: CategoriaProducto): Promise<Producto[]> {
+    const entities = await this.repo.find({
+      where: { categoria, disponible: true },
+      order: { nombre: 'ASC' },
+    })
+    return entities.map((entity) => ProductoMapper.toDomain(entity))
   }
 
   async delete(id: string): Promise<void> {

@@ -13,7 +13,7 @@ import { DashboardRedirect } from './DashboardRedirect';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
 import { RoleRoute } from './RoleRoute';
-import { MisProductosPage } from '../../features/products';
+import { MisProductosPage, CatalogoProductosPage } from '../../features/products';
 
 export function AppRoutes() {
   return (
@@ -28,6 +28,8 @@ export function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardRedirect />} />
+
+        <Route path="/dashboard/cliente/productos" element={<CatalogoProductosPage />} />
 
         <Route path="/dashboard/cliente" element={<ClientDashboardPage />} />
 

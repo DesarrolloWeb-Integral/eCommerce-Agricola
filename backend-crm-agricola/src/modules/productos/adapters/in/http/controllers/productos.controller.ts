@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
+  BadRequestException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -20,6 +21,7 @@ import { CurrentUser } from 'src/modules/auth/adapters/in/http/decorators/curren
 import type { UsuarioAutenticado } from 'src/modules/auth/domain/entities/usuario-autenticado'
 import { RolUsuario } from 'src/modules/usuarios/domain/value-objects/rol-usuario.enum'
 import { ProducerProfileService } from 'src/producer-profile/producer-profile.service'
+import { CategoriaProducto } from '../../../../domain/value-objects/categoria-producto.enum'
 import { RegistrarProductoUseCase } from '../../../../application/use-cases/registrar-producto.use-case'
 import { EditarProductoUseCase } from '../../../../application/use-cases/editar-producto.use-case'
 import { EliminarProductoUseCase } from '../../../../application/use-cases/eliminar-producto.use-case'
@@ -38,6 +40,17 @@ interface ProductoResponse {
   disponible: boolean
   creadoEn: Date
   actualizadoEn: Date
+}
+
+interface ProductoDetalleResponse extends ProductoResponse {
+  productor: {
+    id: string
+    businessName: string
+    generalLocation: string | null
+    contactPhone: string | null
+    contactEmail: string | null
+    socialLinks: Record<string, string>
+  }
 }
 
 @Controller('productos')
@@ -79,15 +92,30 @@ export class ProductosController {
     return productos.map((p) => this.toResponse(p))
   }
 
-  /** Buscar por nombre — público (ruta estática, debe ir antes de /:id) */
+  /** Buscar por nombre — público */
   @Get('buscar')
   async buscar(@Query('q') q: string): Promise<ProductoResponse[]> {
     if (!q || q.trim().length < 2) return []
-    const productos = await this.listarProductosUseCase.ejecutarBusqueda(q)
+    // Rechazar entradas maliciosas
+    if (q.length > 100) throw new BadRequestException('La búsqueda es demasiado larga.')
+    const sanitized = q.replace(/[<>"'%;()&+]/g, '').trim()
+    if (!sanitized) throw new BadRequestException('Entrada inválida.')
+    const productos = await this.listarProductosUseCase.ejecutarBusqueda(sanitized)
     return productos.map((p) => this.toResponse(p))
   }
 
-  /** Mis productos — proveedor autenticado (ruta estática, debe ir antes de /:id) */
+  /** Filtrar por categoría — público */
+  @Get('categoria/:categoria')
+  async porCategoria(@Param('categoria') categoria: string): Promise<ProductoResponse[]> {
+    const cat = categoria.toUpperCase() as CategoriaProducto
+    if (!Object.values(CategoriaProducto).includes(cat)) {
+      throw new BadRequestException('Categoría inválida.')
+    }
+    const productos = await this.listarProductosUseCase.ejecutarPorCategoria(cat)
+    return productos.map((p) => this.toResponse(p))
+  }
+
+  /** Mis productos — proveedor autenticado */
   @Get('mis-productos')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RolUsuario.PROVEEDOR)
@@ -129,13 +157,24 @@ export class ProductosController {
     return { message: 'Producto eliminado correctamente.' }
   }
 
-  /** Ver producto por id — público (ruta dinámica, siempre al final) */
+  /** Ver detalle de producto con info del productor — público */
   @Get(':id')
-  async verProducto(@Param('id', ParseUUIDPipe) id: string): Promise<ProductoResponse> {
+  async verProducto(@Param('id', ParseUUIDPipe) id: string): Promise<ProductoDetalleResponse> {
     const productos = await this.listarProductosUseCase.ejecutarDisponibles()
     const producto = productos.find((p) => p.id === id)
     if (!producto) throw new NotFoundException('Producto no encontrado.')
-    return this.toResponse(producto)
+    const productor = await this.producerProfileService.findPublicById(producto.producerProfileId)
+    return {
+      ...this.toResponse(producto),
+      productor: {
+        id: productor.id,
+        businessName: productor.businessName,
+        generalLocation: productor.generalLocation,
+        contactPhone: productor.contactPhone,
+        contactEmail: productor.contactEmail,
+        socialLinks: productor.socialLinks,
+      },
+    }
   }
 
   private toResponse(p: {
