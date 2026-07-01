@@ -1,5 +1,5 @@
 import React from 'react';
-import { CATEGORIAS } from '../types/producto.types';
+import { CATEGORIA_LABELS, CATEGORIAS } from '../types/producto.types';
 import type { Producto } from '../types/producto.types';
 import { useProductoForm } from '../hooks/useProductoForm';
 
@@ -23,8 +23,27 @@ export function ProductoForm({ productoExistente = null, onSuccess, onCancel }: 
   });
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <h3 className="mb-3">{isEditing ? 'Editar producto' : 'Registrar producto'}</h3>
+      <div className="d-flex align-items-center gap-3 mb-4">
+        <div
+          className="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+          style={{ width: '3rem', height: '3rem' }}
+          aria-hidden="true"
+        >
+          <i className={`bi ${isEditing ? 'bi-pencil-square' : 'bi-plus-circle'} fs-4`} />
+        </div>
+
+        <div>
+          <p className="text-uppercase text-success fw-semibold small mb-1">
+            {isEditing ? 'Edición' : 'Nuevo registro'}
+          </p>
+          <h3 className="h4 fw-bold mb-0">
+            {isEditing ? 'Editar producto' : 'Registrar producto'}
+          </h3>
+        </div>
+      </div>
+
       {apiError && <div className="alert alert-danger">{apiError}</div>}
+
       <div className="mb-3">
         <label htmlFor="nombre" className="form-label fw-semibold">
           Nombre <span className="text-danger">*</span>
@@ -47,7 +66,7 @@ export function ProductoForm({ productoExistente = null, onSuccess, onCancel }: 
           <option value="">Selecciona una categoría</option>
           {CATEGORIAS.map((c) => (
             <option key={c} value={c}>
-              {c.charAt(0) + c.slice(1).toLowerCase()}
+              {CATEGORIA_LABELS[c]}
             </option>
           ))}
         </select>
@@ -90,9 +109,15 @@ export function ProductoForm({ productoExistente = null, onSuccess, onCancel }: 
               {isEditing ? 'Guardando…' : 'Registrando…'}
             </>
           ) : isEditing ? (
-            'Guardar cambios'
+            <>
+              <i className="bi bi-check2-circle me-2" aria-hidden="true" />
+              Guardar cambios
+            </>
           ) : (
-            'Registrar producto'
+            <>
+              <i className="bi bi-plus-circle me-2" aria-hidden="true" />
+              Registrar producto
+            </>
           )}
         </button>
         <button
@@ -101,6 +126,7 @@ export function ProductoForm({ productoExistente = null, onSuccess, onCancel }: 
           onClick={onCancel}
           disabled={isLoading}
         >
+          <i className="bi bi-x-lg me-2" aria-hidden="true" />
           Cancelar
         </button>
       </div>

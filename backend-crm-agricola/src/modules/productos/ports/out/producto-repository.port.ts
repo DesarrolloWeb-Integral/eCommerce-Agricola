@@ -10,5 +10,7 @@ export interface ProductoRepositoryPort {
   findAllDisponibles(): Promise<Producto[]>
   searchByNombre(nombre: string): Promise<Producto[]>
   findByCategoria(categoria: CategoriaProducto): Promise<Producto[]>
+  reservarStock(id: string, quantity: number): Promise<boolean>
+  liberarStock(id: string, quantity: number): Promise<void>
   delete(id: string): Promise<void>
 }

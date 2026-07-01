@@ -10,12 +10,12 @@ export const CATEGORIAS: CategoriaProducto[] = [
 ];
 
 export const CATEGORIA_LABELS: Record<CategoriaProducto, string> = {
-  FRUTAS: '🍎 Frutas',
-  VERDURAS: '🥦 Verduras',
-  GRANOS: '🌾 Granos',
-  LACTEOS: '🥛 Lácteos',
-  CARNES: '🥩 Carnes',
-  OTROS: '📦 Otros',
+  FRUTAS: 'Frutas',
+  VERDURAS: 'Verduras',
+  GRANOS: 'Granos',
+  LACTEOS: 'Lácteos',
+  CARNES: 'Carnes',
+  OTROS: 'Otros',
 };
 
 export interface Producto {
