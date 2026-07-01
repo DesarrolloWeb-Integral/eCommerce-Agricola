@@ -23,7 +23,6 @@ import { ListarPedidosDeMisProductosUseCase } from 'src/modules/pedidos/applicat
 import { ProducerProfileService } from 'src/producer-profile/producer-profile.service'
 import { CancelarPedidoUseCase } from 'src/modules/pedidos/application/use-cases/cancelar-pedido.use-case'
 import { PedidoIdParamDto } from '../dto/pedido-id-param.dto'
-import { ConfirmarPedidoUseCase } from 'src/modules/pedidos/application/use-cases/confirmar-pedido.use-case'
 import type { Pedido } from '../../../../domain/entities/pedido'
 
 @Controller('pedidos')
@@ -33,8 +32,7 @@ export class PedidosController {
     private readonly listarMisPedidosUseCase: ListarMisPedidosUseCase,
     private readonly listarPedidosDeMisProductosUseCase: ListarPedidosDeMisProductosUseCase,
     private readonly producerProfileService: ProducerProfileService,
-    private readonly cancelarPedidoUseCase: CancelarPedidoUseCase,
-    private readonly confirmarPedidoUseCase: ConfirmarPedidoUseCase
+    private readonly cancelarPedidoUseCase: CancelarPedidoUseCase
   ) {}
 
   @Get('mis-productos')
@@ -70,23 +68,23 @@ export class PedidosController {
     return pedidos.map((pedido) => this.toResponse(pedido))
   }
 
-  @Patch(':id/confirmar')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.PROVEEDOR)
-  async confirmar(
-    @Param() params: PedidoIdParamDto,
-    @CurrentUser() usuarioAutenticado: UsuarioAutenticado
-  ) {
-    const perfilProductor = await this.producerProfileService.findOwn(usuarioAutenticado.id)
+  // @Patch(':id/confirmar')
+  // @HttpCode(HttpStatus.OK)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(RolUsuario.PROVEEDOR)
+  // async confirmar(
+  //   @Param() params: PedidoIdParamDto,
+  //   @CurrentUser() usuarioAutenticado: UsuarioAutenticado
+  // ) {
+  //   const perfilProductor = await this.producerProfileService.findOwn(usuarioAutenticado.id)
 
-    const pedido = await this.confirmarPedidoUseCase.execute({
-      pedidoId: params.id,
-      producerProfileId: perfilProductor.id,
-    })
+  //   const pedido = await this.confirmarPedidoUseCase.execute({
+  //     pedidoId: params.id,
+  //     producerProfileId: perfilProductor.id,
+  //   })
 
-    return this.toResponse(pedido)
-  }
+  //   return this.toResponse(pedido)
+  // }
 
   @Patch(':id/cancelar')
   @HttpCode(HttpStatus.OK)

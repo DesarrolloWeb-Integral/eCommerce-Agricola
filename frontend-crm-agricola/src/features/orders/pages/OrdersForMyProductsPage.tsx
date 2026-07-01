@@ -1,5 +1,6 @@
 import { OrderStatusBadge } from '../components';
-import { useConfirmOrder, useOrdersForMyProducts } from '../hooks';
+import { useOrdersForMyProducts } from '../hooks';
+import type { OrderStatus } from '../types';
 
 function formatOrderDate(value: string): string {
   return new Date(value).toLocaleString('es-MX', {
@@ -8,24 +9,41 @@ function formatOrderDate(value: string): string {
   });
 }
 
+const currencyFormatter = new Intl.NumberFormat('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+});
+
+function formatCurrency(value: number): string {
+  return currencyFormatter.format(value);
+}
+
+function getPaymentStatusInfo(status: OrderStatus): {
+  className: string;
+  icon: string;
+  message: string;
+} | null {
+  if (status === 'PENDIENTE') {
+    return {
+      className: 'alert-warning',
+      icon: 'bi-hourglass-split',
+      message: 'En espera de pago del cliente.',
+    };
+  }
+
+  if (status === 'CONFIRMADO') {
+    return {
+      className: 'alert-success',
+      icon: 'bi-check2-circle',
+      message: 'Pago aprobado. Pedido listo para preparar.',
+    };
+  }
+
+  return null;
+}
+
 export function OrdersForMyProductsPage() {
   const { orders, isLoading, error, reloadOrders } = useOrdersForMyProducts();
-  const { isConfirming, error: confirmError, confirmProviderOrder } = useConfirmOrder();
-
-  async function handleConfirmOrder(orderId: string): Promise<void> {
-    const shouldConfirm = window.confirm('¿Estás seguro de que deseas confirmar este pedido?');
-
-    if (!shouldConfirm) {
-      return;
-    }
-
-    try {
-      await confirmProviderOrder(orderId);
-      await reloadOrders();
-    } catch {
-      // El mensaje de error se muestra mediante confirmError.
-    }
-  }
 
   return (
     <main className="container-xxl">
@@ -49,7 +67,8 @@ export function OrdersForMyProductsPage() {
                 <h1 className="h2 fw-bold mb-2">Pedidos recibidos</h1>
 
                 <p className="text-secondary mb-0">
-                  Revisa las solicitudes sobre tus productos y confirma los pedidos pendientes.
+                  Los pedidos se confirman automaticamente cuando Mercado Pago aprueba el pago del
+                  cliente.
                 </p>
               </div>
             </div>
@@ -60,7 +79,7 @@ export function OrdersForMyProductsPage() {
               type="button"
               className="btn btn-outline-success"
               onClick={() => void reloadOrders()}
-              disabled={isLoading || isConfirming}
+              disabled={isLoading}
             >
               <i className="bi bi-arrow-clockwise me-2" aria-hidden="true" />
               Actualizar pedidos
@@ -73,13 +92,6 @@ export function OrdersForMyProductsPage() {
         <div className="alert alert-danger d-flex align-items-center gap-2" role="alert">
           <i className="bi bi-exclamation-triangle-fill" aria-hidden="true" />
           <span>{error}</span>
-        </div>
-      )}
-
-      {confirmError && (
-        <div className="alert alert-warning d-flex align-items-center gap-2" role="alert">
-          <i className="bi bi-info-circle-fill" aria-hidden="true" />
-          <span>{confirmError}</span>
         </div>
       )}
 
@@ -103,9 +115,9 @@ export function OrdersForMyProductsPage() {
               <i className="bi bi-inbox fs-2" />
             </div>
 
-            <h2 className="h4 fw-bold mb-2">Aún no tienes pedidos sobre tus productos</h2>
+            <h2 className="h4 fw-bold mb-2">Aun no tienes pedidos sobre tus productos</h2>
             <p className="text-secondary mb-0">
-              Cuando un cliente cree un pedido, aparecerá en esta sección.
+              Cuando un cliente cree un pedido, aparecera en esta seccion.
             </p>
           </div>
         </section>
@@ -113,90 +125,78 @@ export function OrdersForMyProductsPage() {
         !error &&
         orders.length > 0 && (
           <section className="row g-4" aria-label="Pedidos recibidos">
-            {orders.map((order) => (
-              <div className="col-12" key={order.id}>
-                <article className="card border-0 shadow-sm rounded-4 overflow-hidden">
-                  <div className="card-header bg-white border-0 p-4">
-                    <div className="d-flex flex-column flex-lg-row gap-3">
-                      <div className="flex-grow-1">
-                        <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
-                          <h2 className="h5 fw-bold mb-0">Pedido {order.id}</h2>
-                          <OrderStatusBadge status={order.estado} />
-                        </div>
+            {orders.map((order) => {
+              const statusInfo = getPaymentStatusInfo(order.estado);
 
-                        <div className="d-flex flex-wrap gap-3 text-secondary small">
-                          <span>
-                            <i className="bi bi-person me-1 text-success" aria-hidden="true" />
-                            Cliente {order.clientId}
-                          </span>
-                          <span>
-                            <i className="bi bi-calendar3 me-1 text-success" aria-hidden="true" />
-                            {formatOrderDate(order.createdAt)}
-                          </span>
-                          <span>
-                            <i className="bi bi-cash-coin me-1 text-success" aria-hidden="true" />$
-                            {order.subtotal.toFixed(2)}
-                          </span>
+              return (
+                <div className="col-12" key={order.id}>
+                  <article className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div className="card-header bg-white border-0 p-4">
+                      <div className="d-flex flex-column flex-lg-row gap-3">
+                        <div className="flex-grow-1">
+                          <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h2 className="h5 fw-bold mb-0">Pedido {order.id}</h2>
+                            <OrderStatusBadge status={order.estado} />
+                          </div>
+
+                          <div className="d-flex flex-wrap gap-3 text-secondary small">
+                            <span>
+                              <i className="bi bi-person me-1 text-success" aria-hidden="true" />
+                              Cliente {order.clientId}
+                            </span>
+                            <span>
+                              <i className="bi bi-calendar3 me-1 text-success" aria-hidden="true" />
+                              {formatOrderDate(order.createdAt)}
+                            </span>
+                            <span>
+                              <i className="bi bi-cash-coin me-1 text-success" aria-hidden="true" />
+                              {formatCurrency(order.subtotal)}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      {order.estado === 'PENDIENTE' && (
-                        <div className="align-self-lg-start">
-                          <button
-                            type="button"
-                            className="btn btn-success btn-sm"
-                            onClick={() => void handleConfirmOrder(order.id)}
-                            disabled={isConfirming}
-                          >
-                            {isConfirming ? (
-                              <>
-                                <span
-                                  className="spinner-border spinner-border-sm me-2"
-                                  aria-hidden="true"
-                                />
-                                Confirmando...
-                              </>
-                            ) : (
-                              <>
-                                <i className="bi bi-check2-circle me-2" aria-hidden="true" />
-                                Confirmar pedido
-                              </>
-                            )}
-                          </button>
+                      {statusInfo && (
+                        <div
+                          className={`alert ${statusInfo.className} d-inline-flex align-items-center gap-2 py-2 px-3 small mb-0 mt-3`}
+                          role="status"
+                        >
+                          <i className={`bi ${statusInfo.icon}`} aria-hidden="true" />
+                          <span>{statusInfo.message}</span>
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  <div className="card-body p-4">
-                    <h3 className="h6 fw-bold mb-3">Productos solicitados</h3>
+                    <div className="card-body p-4">
+                      <h3 className="h6 fw-bold mb-3">Productos solicitados</h3>
 
-                    <div className="table-responsive">
-                      <table className="table table-sm align-middle mb-0">
-                        <thead className="table-light">
-                          <tr>
-                            <th scope="col">Producto</th>
-                            <th scope="col">Cantidad solicitada</th>
-                            <th scope="col">Precio unitario</th>
-                            <th scope="col">Subtotal</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {order.items.map((item) => (
-                            <tr key={item.productId}>
-                              <td className="fw-semibold">{item.productId}</td>
-                              <td>{item.quantity}</td>
-                              <td>${item.unitPrice.toFixed(2)}</td>
-                              <td className="fw-semibold">${item.subtotal.toFixed(2)}</td>
+                      <div className="table-responsive">
+                        <table className="table table-sm align-middle mb-0">
+                          <thead className="table-light">
+                            <tr>
+                              <th scope="col">Producto</th>
+                              <th scope="col">Cantidad solicitada</th>
+                              <th scope="col">Precio unitario</th>
+                              <th scope="col">Subtotal</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {order.items.map((item) => (
+                              <tr key={item.productId}>
+                                <td className="fw-semibold">{item.productId}</td>
+                                <td>{item.quantity}</td>
+                                <td>{formatCurrency(item.unitPrice)}</td>
+                                <td className="fw-semibold">{formatCurrency(item.subtotal)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              </div>
-            ))}
+                  </article>
+                </div>
+              );
+            })}
           </section>
         )
       )}
