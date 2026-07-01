@@ -16,6 +16,7 @@ import { ListarPedidosDeMisProductosUseCase } from './application/use-cases/list
 import { CancelarPedidoUseCase } from './application/use-cases/cancelar-pedido.use-case'
 import { ConfirmarPedidoUseCase } from './application/use-cases/confirmar-pedido.use-case'
 import { RegistrarPedidoConfirmadoHandler } from './application/event-handlers/registrar-pedido-confirmado.handler'
+import { ConfirmarPedidoDesdePagoUseCase } from './application/use-cases/confirmar-pedido-desde-pago.use-case'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { RegistrarPedidoConfirmadoHandler } from './application/event-handlers/r
     ListarPedidosDeMisProductosUseCase,
     CancelarPedidoUseCase,
     ConfirmarPedidoUseCase,
+    ConfirmarPedidoDesdePagoUseCase,
     RegistrarPedidoConfirmadoHandler,
     TypeormPedidoRepository,
     ProductoConsultaAdapter,
@@ -43,6 +45,6 @@ import { RegistrarPedidoConfirmadoHandler } from './application/event-handlers/r
       useExisting: ProductoConsultaAdapter,
     },
   ],
-  exports: [PEDIDO_REPOSITORY_PORT],
+  exports: [PEDIDO_REPOSITORY_PORT, ConfirmarPedidoDesdePagoUseCase],
 })
 export class PedidosModule {}

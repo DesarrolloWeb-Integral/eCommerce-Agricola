@@ -29,10 +29,3 @@ export function cancelOrder(orderId: string): Promise<Order> {
     requiresAuth: true,
   });
 }
-
-export function confirmOrder(orderId: string): Promise<Order> {
-  return apiClient<Order>(`/pedidos/${encodeURIComponent(orderId)}/confirmar`, {
-    method: 'PATCH',
-    requiresAuth: true,
-  });
-}

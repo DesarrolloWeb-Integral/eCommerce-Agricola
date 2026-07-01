@@ -9,6 +9,15 @@ function getProducerLabel(group: CartProducerGroup): string {
   return group.producerName ?? `Productor ${group.producerProfileId.slice(0, 8)}`;
 }
 
+const currencyFormatter = new Intl.NumberFormat('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+});
+
+function formatCurrency(value: number): string {
+  return currencyFormatter.format(value);
+}
+
 export function CreateOrderPage() {
   const navigate = useNavigate();
   const { groups, summary, updateQuantity, removeItem, clearProducerGroup, clearCart } = useCart();
@@ -99,9 +108,23 @@ export function CreateOrderPage() {
       </section>
 
       {successMessage && (
-        <div className="alert alert-success d-flex align-items-center gap-2" role="alert">
-          <i className="bi bi-check2-circle" aria-hidden="true" />
-          <span>{successMessage}</span>
+        <div
+          className="alert alert-success d-flex flex-column flex-md-row align-items-md-center gap-3"
+          role="alert"
+        >
+          <div className="d-flex align-items-center gap-2">
+            <i className="bi bi-check2-circle" aria-hidden="true" />
+            <span>{successMessage}</span>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-success btn-sm ms-md-auto"
+            onClick={() => navigate('/dashboard/cliente/pedidos')}
+          >
+            <i className="bi bi-credit-card me-2" aria-hidden="true" />
+            Ir a pagar pedido
+          </button>
         </div>
       )}
 
@@ -165,7 +188,7 @@ export function CreateOrderPage() {
               </div>
 
               <p className="fw-bold text-success mb-0 ms-lg-auto">
-                Total: ${summary.subtotal.toFixed(2)}
+                Total: {formatCurrency(summary.subtotal)}
               </p>
 
               <button

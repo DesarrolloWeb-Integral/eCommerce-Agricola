@@ -10,6 +10,15 @@ interface CartProducerOrderCardProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
 }
 
+const currencyFormatter = new Intl.NumberFormat('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+});
+
+function formatCurrency(value: number): string {
+  return currencyFormatter.format(value);
+}
+
 export function CartProducerOrderCard({
   group,
   isCreating,
@@ -33,7 +42,7 @@ export function CartProducerOrderCard({
               {group.totalItems} producto
               {group.totalItems !== 1 ? 's' : ''}
             </span>
-            <p className="fw-bold text-success mb-0">${group.subtotal.toFixed(2)}</p>
+            <p className="fw-bold text-success mb-0">{formatCurrency(group.subtotal)}</p>
           </div>
         </div>
       </div>
@@ -46,12 +55,12 @@ export function CartProducerOrderCard({
                 <h3 className="h6 fw-bold mb-1">{item.name}</h3>
                 <div className="d-flex flex-wrap gap-3 text-secondary small">
                   <span>
-                    <i className="bi bi-tag text-success me-1" aria-hidden="true" />$
-                    {item.unitPrice.toFixed(2)} por unidad
+                    <i className="bi bi-tag text-success me-1" aria-hidden="true" />
+                    {formatCurrency(item.unitPrice)} por unidad
                   </span>
                   <span>
                     <i className="bi bi-calculator text-success me-1" aria-hidden="true" />
-                    Subtotal: ${(item.quantity * item.unitPrice).toFixed(2)}
+                    Subtotal: {formatCurrency(item.quantity * item.unitPrice)}
                   </span>
                 </div>
               </div>

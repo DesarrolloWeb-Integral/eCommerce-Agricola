@@ -37,8 +37,8 @@ export function ProductCatalogCard({
         <p className="card-text text-secondary small flex-grow-1">{producto.descripcion}</p>
 
         <div className="d-flex justify-content-between align-items-center mt-3">
-          <span className="fs-5 fw-bold text-success">${producto.precio.toFixed(2)}</span>
-          <span className="text-secondary small">{producto.cantidad} MXM.</span>
+          <span className="fs-5 fw-bold text-success">${producto.precio.toFixed(2)} MXN</span>
+          <span className="text-secondary small">{producto.cantidad} PZ.</span>
         </div>
 
         <div className="input-group input-group-sm mt-3">
