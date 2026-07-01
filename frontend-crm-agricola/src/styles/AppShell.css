@@ -1,0 +1,20 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell-main {
+  flex: 1;
+}
+
+@media (max-width: 575.98px) {
+  .app-shell .navbar-brand small {
+    display: none;
+  }
+
+  .app-shell-main {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+}

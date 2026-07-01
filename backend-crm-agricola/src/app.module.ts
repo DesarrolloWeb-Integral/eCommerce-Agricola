@@ -9,6 +9,7 @@ import { PagosComisionesModule } from './modules/payments/pagos-comisiones.modul
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ProducerProfileModule } from './producer-profile/producer-profile.module'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +26,8 @@ import { ProducerProfileModule } from './producer-profile/producer-profile.modul
       autoLoadEntities: true,
       synchronize: true,
     }),
+
+    EventEmitterModule.forRoot(),
 
     AuthModule,
     UsuariosModule,

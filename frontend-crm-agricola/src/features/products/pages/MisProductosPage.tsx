@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProductoForm } from '../components/ProductoForm';
-import { getMisProductos, eliminarProducto } from '../services/producto.service';
+
 import { getOwnProducerProfile } from '../../../producer-profile';
+import { ProductoForm } from '../components/ProductoForm';
+import { eliminarProducto, getMisProductos } from '../services/producto.service';
 import type { Producto } from '../types/producto.types';
 import { CATEGORIA_LABELS } from '../types/producto.types';
 
@@ -60,126 +61,242 @@ export function MisProductosPage() {
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center py-5">
-        <div className="spinner-border text-success" role="status" />
-      </div>
+      <main className="container-xxl">
+        <div className="card border-0 shadow-sm rounded-4">
+          <div className="card-body text-center py-5">
+            <div className="spinner-border text-success mb-3" role="status">
+              <span className="visually-hidden">Cargando productos...</span>
+            </div>
+            <p className="text-secondary mb-0">Cargando productos...</p>
+          </div>
+        </div>
+      </main>
     );
   }
 
-  // Sin perfil — bloquear acceso
   if (tienePerfil === false) {
     return (
-      <div className="container py-5" style={{ maxWidth: 520 }}>
-        <div className="card border-warning shadow-sm">
-          <div className="card-body text-center py-5">
-            <div style={{ fontSize: '3rem' }}>🏪</div>
-            <h4 className="fw-bold mt-3 mb-2">Primero configura tu perfil</h4>
-            <p className="text-muted mb-4">
-              Necesitas crear tu perfil de productor antes de poder registrar productos.
-            </p>
-            <button
-              className="btn btn-success px-4"
-              onClick={() => navigate('/dashboard/proveedor/perfil')}
-            >
-              Crear perfil de productor
-            </button>
-            <button
-              className="btn btn-outline-secondary ms-2 px-4"
-              onClick={() => navigate('/dashboard/proveedor')}
-            >
-              Volver
-            </button>
+      <main className="container-xxl">
+        <div className="row justify-content-center">
+          <div className="col-12 col-lg-7 col-xl-6">
+            <section className="card border-warning shadow-sm rounded-4">
+              <div className="card-body text-center p-4 p-lg-5">
+                <div
+                  className="bg-warning-subtle text-warning-emphasis rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                  style={{ width: '4rem', height: '4rem' }}
+                  aria-hidden="true"
+                >
+                  <i className="bi bi-shop fs-2" />
+                </div>
+
+                <h1 className="h4 fw-bold mb-2">Primero configura tu perfil</h1>
+                <p className="text-secondary mb-4">
+                  Necesitas crear tu perfil de productor antes de poder registrar productos.
+                </p>
+
+                <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-success px-4"
+                    onClick={() => navigate('/dashboard/proveedor/perfil')}
+                  >
+                    <i className="bi bi-person-vcard me-2" aria-hidden="true" />
+                    Crear perfil
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary px-4"
+                    onClick={() => navigate('/dashboard/proveedor')}
+                  >
+                    <i className="bi bi-arrow-left me-2" aria-hidden="true" />
+                    Volver
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="container py-4" style={{ maxWidth: 800 }}>
-      <div className="d-flex align-items-center gap-3 mb-4">
-        <button
-          className="btn btn-outline-secondary btn-sm"
-          onClick={() => navigate('/dashboard/proveedor')}
-        >
-          ← Volver
-        </button>
-        <h2 className="mb-0">Mis productos</h2>
-      </div>
+    <main className="container-xxl">
+      <section className="bg-white border rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+        <div className="row align-items-center g-4">
+          <div className="col-12 col-lg">
+            <div className="d-flex align-items-start gap-3">
+              <div
+                className="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                style={{ width: '3.75rem', height: '3.75rem' }}
+                aria-hidden="true"
+              >
+                <i className="bi bi-box-seam fs-3" />
+              </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+              <div>
+                <p className="text-uppercase text-success fw-semibold small mb-1">
+                  Catálogo del proveedor
+                </p>
 
-      {creando || editando ? (
-        <div className="card p-4 mb-4">
-          <ProductoForm
-            productoExistente={editando}
-            onSuccess={handleSuccess}
-            onCancel={() => {
-              setCreando(false);
-              setEditando(null);
-            }}
-          />
+                <h1 className="h2 fw-bold mb-2">Mis productos</h1>
+
+                <p className="text-secondary mb-0">
+                  Registra, edita y administra los productos que ofreces a tus clientes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-12 col-lg-auto">
+            <div className="d-flex flex-column flex-sm-row gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => navigate('/dashboard/proveedor')}
+              >
+                <i className="bi bi-arrow-left me-2" aria-hidden="true" />
+                Volver
+              </button>
+
+              {!creando && !editando && (
+                <button type="button" className="btn btn-success" onClick={() => setCreando(true)}>
+                  <i className="bi bi-plus-circle me-2" aria-hidden="true" />
+                  Registrar producto
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      ) : (
-        <button className="btn btn-success mb-4" onClick={() => setCreando(true)}>
-          + Registrar producto
-        </button>
+      </section>
+
+      {error && (
+        <div className="alert alert-danger d-flex align-items-center gap-2" role="alert">
+          <i className="bi bi-exclamation-triangle-fill" aria-hidden="true" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {(creando || editando) && (
+        <section className="card border-0 shadow-sm rounded-4 mb-4">
+          <div className="card-body p-4 p-lg-5">
+            <ProductoForm
+              productoExistente={editando}
+              onSuccess={handleSuccess}
+              onCancel={() => {
+                setCreando(false);
+                setEditando(null);
+              }}
+            />
+          </div>
+        </section>
       )}
 
       {productos.length === 0 ? (
-        <p className="text-muted">Aún no tienes productos registrados.</p>
+        <section className="card border-0 shadow-sm rounded-4">
+          <div className="card-body text-center p-4 p-lg-5">
+            <div
+              className="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style={{ width: '4rem', height: '4rem' }}
+              aria-hidden="true"
+            >
+              <i className="bi bi-box fs-2" />
+            </div>
+
+            <h2 className="h4 fw-bold mb-2">Aún no tienes productos registrados</h2>
+            <p className="text-secondary mb-4">
+              Crea tu primer producto para que los clientes puedan encontrarlo en el catálogo.
+            </p>
+
+            {!creando && !editando && (
+              <button type="button" className="btn btn-success" onClick={() => setCreando(true)}>
+                <i className="bi bi-plus-circle me-2" aria-hidden="true" />
+                Registrar producto
+              </button>
+            )}
+          </div>
+        </section>
       ) : (
-        <div className="table-responsive">
-          <table className="table table-hover align-middle">
-            <thead className="table-light">
-              <tr>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Disponible</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productos.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.nombre}</td>
-                  <td>
-                    <span className="badge bg-secondary">{CATEGORIA_LABELS[p.categoria]}</span>
-                  </td>
-                  <td>${p.precio.toFixed(2)}</td>
-                  <td>{p.cantidad}</td>
-                  <td>
-                    <span className={`badge ${p.disponible ? 'bg-success' : 'bg-danger'}`}>
-                      {p.disponible ? 'Sí' : 'No'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => {
-                          setEditando(p);
-                          setCreando(false);
-                        }}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleEliminar(p.id)}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
+        <section className="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div className="card-header bg-white border-0 p-4">
+            <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+              <div>
+                <p className="text-uppercase text-success fw-semibold small mb-1">Inventario</p>
+                <h2 className="h5 fw-bold mb-0">Productos registrados</h2>
+              </div>
+
+              <span className="badge text-bg-light border text-secondary ms-sm-auto">
+                {productos.length} producto
+                {productos.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Categoría</th>
+                  <th scope="col">Precio</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Disponible</th>
+                  <th scope="col">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {productos.map((producto) => (
+                  <tr key={producto.id}>
+                    <td className="fw-semibold">{producto.nombre}</td>
+                    <td>
+                      <span className="badge text-bg-light border text-secondary">
+                        <i className="bi bi-tag text-success me-1" aria-hidden="true" />
+                        {CATEGORIA_LABELS[producto.categoria]}
+                      </span>
+                    </td>
+                    <td className="fw-semibold text-success">${producto.precio.toFixed(2)}</td>
+                    <td>{producto.cantidad}</td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          producto.disponible ? 'text-bg-success' : 'text-bg-danger'
+                        }`}
+                      >
+                        {producto.disponible ? 'Sí' : 'No'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="d-flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => {
+                            setEditando(producto);
+                            setCreando(false);
+                          }}
+                        >
+                          <i className="bi bi-pencil-square me-1" aria-hidden="true" />
+                          Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => void handleEliminar(producto.id)}
+                        >
+                          <i className="bi bi-trash me-1" aria-hidden="true" />
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
-    </div>
+    </main>
   );
 }

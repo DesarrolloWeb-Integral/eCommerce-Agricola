@@ -52,6 +52,33 @@ export class TypeormProductoRepository implements ProductoRepositoryPort {
     return entities.map((entity) => ProductoMapper.toDomain(entity))
   }
 
+  async reservarStock(id: string, quantity: number): Promise<boolean> {
+    const resultado = await this.repo
+      .createQueryBuilder()
+      .update()
+      .set({
+        cantidad: () => '"cantidad" - :quantity',
+      })
+      .where('id = :id', { id })
+      .andWhere('cantidad >= :quantity', { quantity })
+      .andWhere('disponible = true')
+      .execute()
+
+    return (resultado.affected ?? 0) === 1
+  }
+
+  async liberarStock(id: string, quantity: number): Promise<void> {
+    await this.repo
+      .createQueryBuilder()
+      .update()
+      .set({
+        cantidad: () => '"cantidad" + :quantity',
+      })
+      .where('id = :id', { id })
+      .setParameters({ quantity })
+      .execute()
+  }
+
   async delete(id: string): Promise<void> {
     await this.repo.delete(id)
   }

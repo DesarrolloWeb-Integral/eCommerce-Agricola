@@ -53,5 +53,6 @@ import { RolesGuard } from './adapters/in/passport/roles.guard'
       useExisting: UsuariosAuthUserRepositoryAdapter,
     },
   ],
+  exports: [RolesGuard],
 })
 export class AuthModule {}
