@@ -14,10 +14,12 @@ import {
 } from '../../ports/out/pedido-repository.port'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { PedidoConfirmadoEvent } from '../../domain/events/pedido-confirmado.event'
+import { RegistrarLogUseCase } from '../../../auditoria/application/use-cases/registrar-log.use-case'
 
 export interface ConfirmarPedidoInput {
   pedidoId: string
   producerProfileId: string
+  usuarioId: string
 }
 
 @Injectable()
@@ -25,7 +27,8 @@ export class ConfirmarPedidoUseCase {
   constructor(
     @Inject(PEDIDO_REPOSITORY_PORT)
     private readonly pedidoRepository: PedidoRepositoryPort,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly registrarLogUseCase: RegistrarLogUseCase
   ) {}
 
   async execute(input: ConfirmarPedidoInput): Promise<Pedido> {
@@ -43,6 +46,7 @@ export class ConfirmarPedidoUseCase {
       throw new BadRequestException('Solo los pedidos pendientes pueden confirmarse.')
     }
 
+    const estadoAnterior = pedido.estado
     pedido.confirmar()
 
     const pedidoConfirmado = await this.pedidoRepository.save(pedido)
@@ -58,6 +62,13 @@ export class ConfirmarPedidoUseCase {
         pedidoConfirmado.updatedAt
       )
     )
+
+    await this.registrarLogUseCase.execute({
+      usuarioId: input.usuarioId,
+      accion: 'CAMBIO_ESTADO_PEDIDO',
+      recursoAfectado: `Pedido:${pedidoConfirmado.id}`,
+      detalle: `Pedido aceptado por el productor. Estado: ${estadoAnterior} -> ${pedidoConfirmado.estado}`,
+    })
 
     return pedidoConfirmado
   }
