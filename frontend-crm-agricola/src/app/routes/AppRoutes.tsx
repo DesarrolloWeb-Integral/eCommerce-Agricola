@@ -16,6 +16,7 @@ import { RoleRoute } from './RoleRoute';
 import { MisProductosPage, CatalogoProductosPage } from '../../features/products';
 import { CreateOrderPage, MyOrdersPage, OrdersForMyProductsPage } from '../../features/orders';
 import { AppShell } from '../../shared/components/layout/AppShell';
+import { AuditLogsPage } from '../../features/audit';
 
 export function AppRoutes() {
   return (
@@ -63,6 +64,7 @@ export function AppRoutes() {
 
         <Route element={<RoleRoute allowedRoles={['ADMINISTRADOR']} />}>
           <Route path="/usuarios" element={<GetUserByIdPage />} />
+          <Route path="/auditoria" element={<AuditLogsPage />} />
         </Route>
       </Route>
 

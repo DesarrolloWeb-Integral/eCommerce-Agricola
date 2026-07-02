@@ -7,6 +7,7 @@ import { TOKEN_SERVICE_PORT } from '../../ports/out/token-service.port'
 import { PASSWORD_HASHER_PORT } from '../../../usuarios/ports/out/password-hasher.port'
 import type { PasswordHasherPort } from '../../../usuarios/ports/out/password-hasher.port'
 import type { AuthUserRepositoryPort } from '../../ports/out/auth-user.repository.port'
+import { RegistrarLogUseCase } from '../../../auditoria/application/use-cases/registrar-log.use-case'
 import { EstadoCuenta } from '../../../usuarios/domain/value-objects/estado-cuenta.enum'
 
 export interface IniciarSesionInput {
@@ -24,7 +25,9 @@ export class IniciarSesionUseCase {
     private readonly passwordHasher: PasswordHasherPort,
 
     @Inject(TOKEN_SERVICE_PORT)
-    private readonly tokenService: TokenServicePort
+    private readonly tokenService: TokenServicePort,
+
+    private readonly registrarLogUseCase: RegistrarLogUseCase
   ) {}
 
   async execute(input: IniciarSesionInput): Promise<AuthTokens> {
@@ -33,6 +36,13 @@ export class IniciarSesionUseCase {
     const usuario = await this.authUserRepository.findByEmail(email)
 
     if (!usuario) {
+      await this.registrarLogUseCase.execute({
+        usuarioId: 'ANONIMO',
+        accion: 'LOGIN_FALLIDO',
+        recursoAfectado: 'Autenticación',
+        detalle: `Intento fallido con email: ${email}`, // El UseCase ofuscará el email automáticamente
+      })
+
       throw new UnauthorizedException('Correo electrónico o contraseña incorrectos.')
     }
 
@@ -66,6 +76,12 @@ export class IniciarSesionUseCase {
     )
 
     await this.authUserRepository.updateRefreshTokenHash(usuario.id, refreshTokenHash)
+
+    await this.registrarLogUseCase.execute({
+      usuarioId: usuario.id,
+      accion: 'LOGIN_EXITOSO',
+      recursoAfectado: 'Autenticación',
+    })
 
     return {
       accessToken,

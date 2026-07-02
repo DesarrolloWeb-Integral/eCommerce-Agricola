@@ -16,11 +16,13 @@ import { RefrescarTokenUseCase } from './application/use-cases/refrescar-token.u
 import { CerrarSesionUseCase } from './application/use-cases/cerrar-sesion.use-case'
 import { JwtStrategy } from './adapters/in/passport/jwt.strategy'
 import { RolesGuard } from './adapters/in/passport/roles.guard'
+import { AuditoriaModule } from '../auditoria/auditoria.module'
 
 @Module({
   imports: [
     UsuariosModule,
     ConfigModule.forFeature(jwtConfig),
+    AuditoriaModule,
     PassportModule.register({
       session: false,
     }),

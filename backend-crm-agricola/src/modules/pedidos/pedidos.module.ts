@@ -18,6 +18,7 @@ import { ConfirmarPedidoUseCase } from './application/use-cases/confirmar-pedido
 import { RegistrarPedidoConfirmadoHandler } from './application/event-handlers/registrar-pedido-confirmado.handler'
 import { ConfirmarPedidoDesdePagoUseCase } from './application/use-cases/confirmar-pedido-desde-pago.use-case'
 import { UsuariosModule } from '../usuarios/usuarios.module'
+import { AuditoriaModule } from '../auditoria/auditoria.module'
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module'
     AuthModule,
     ProducerProfileModule,
     UsuariosModule,
+    AuditoriaModule,
   ],
   controllers: [PedidosController],
   providers: [
