@@ -9,12 +9,10 @@ import { ListarProductosUseCase } from './application/use-cases/listar-productos
 import { ProductosController } from './adapters/in/http/controllers/productos.controller'
 import { PRODUCTO_REPOSITORY_PORT } from './ports/out/producto-repository.port'
 import { ProducerProfileModule } from 'src/producer-profile/producer-profile.module'
+import { AuditoriaModule } from '../auditoria/auditoria.module'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ProductoEntity]),
-    ProducerProfileModule, // para obtener el perfil del productor autenticado
-  ],
+  imports: [TypeOrmModule.forFeature([ProductoEntity]), ProducerProfileModule, AuditoriaModule],
   controllers: [ProductosController],
   providers: [
     RegistrarProductoUseCase,
