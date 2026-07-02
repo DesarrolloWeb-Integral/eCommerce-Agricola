@@ -11,6 +11,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
+import { Throttle } from '@nestjs/throttler'
 import type { Request, Response } from 'express'
 
 import { IniciarSesionUseCase } from '../../../../application/use-cases/iniciar-sesion.use-case'
@@ -52,6 +53,7 @@ export class AuthController {
     private readonly cerrarSesionUseCase: CerrarSesionUseCase
   ) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 intentos por minuto por IP
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async iniciarSesion(
@@ -72,6 +74,7 @@ export class AuthController {
     }
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // evita abuso del refresh token
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refrescarToken(
