@@ -13,9 +13,10 @@ import { EditarUsuarioUseCase } from './application/use-cases/editar-usuario.use
 import { RegistrarUsuarioUseCase } from './application/use-cases/registrar-usuario.use-case'
 import { PASSWORD_HASHER_PORT } from './ports/out/password-hasher.port'
 import { USUARIO_REPOSITORY_PORT } from './ports/out/usuario-repository.port'
+import { AuditoriaModule } from '../auditoria/auditoria.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsuarioEntity])],
+  imports: [TypeOrmModule.forFeature([UsuarioEntity]), AuditoriaModule],
   controllers: [UsuariosController],
   providers: [
     RegistrarUsuarioUseCase,
