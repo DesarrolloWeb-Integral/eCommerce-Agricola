@@ -16,10 +16,12 @@ import {
   type ProductoConsultaPort,
 } from '../../ports/out/producto-consulta.port'
 import { EstadoPedido } from '../../domain/value-objects/estado-pedido.enum'
+import { RegistrarLogUseCase } from '../../../auditoria/application/use-cases/registrar-log.use-case'
 
 export interface CancelarPedidoInput {
   pedidoId: string
   clientId: string
+  usuarioId: string
 }
 
 @Injectable()
@@ -28,7 +30,8 @@ export class CancelarPedidoUseCase {
     @Inject(PEDIDO_REPOSITORY_PORT)
     private readonly pedidoRepository: PedidoRepositoryPort,
     @Inject(PRODUCTO_CONSULTA_PORT)
-    private readonly productoConsulta: ProductoConsultaPort
+    private readonly productoConsulta: ProductoConsultaPort,
+    private readonly registrarLogUseCase: RegistrarLogUseCase
   ) {}
 
   async execute(input: CancelarPedidoInput): Promise<Pedido> {
@@ -46,6 +49,7 @@ export class CancelarPedidoUseCase {
       throw new BadRequestException('Solo los pedidos pendientes pueden cancelarse.')
     }
 
+    const estadoAnterior = pedido.estado
     pedido.cancelar()
 
     const pedidoCancelado = await this.pedidoRepository.save(pedido)
@@ -55,6 +59,13 @@ export class CancelarPedidoUseCase {
         this.productoConsulta.liberarStock(item.productId, item.quantity)
       )
     )
+
+    await this.registrarLogUseCase.execute({
+      usuarioId: input.usuarioId,
+      accion: 'CAMBIO_ESTADO_PEDIDO',
+      recursoAfectado: `Pedido:${pedidoCancelado.id}`,
+      detalle: `Pedido cancelado por el cliente. Estado: ${estadoAnterior} -> ${pedidoCancelado.estado}`,
+    })
 
     return pedidoCancelado
   }

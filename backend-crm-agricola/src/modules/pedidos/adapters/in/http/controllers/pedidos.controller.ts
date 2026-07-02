@@ -115,6 +115,7 @@ export class PedidosController {
     const pedido = await this.cancelarPedidoUseCase.execute({
       pedidoId: params.id,
       clientId: usuarioAutenticado.id,
+      usuarioId: usuarioAutenticado.id,
     })
 
     return this.toResponse(pedido)

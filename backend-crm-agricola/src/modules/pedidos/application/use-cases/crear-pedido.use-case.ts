@@ -12,6 +12,7 @@ import {
   type ProductoConsultaPort,
   type ProductoParaPedido,
 } from '../../ports/out/producto-consulta.port'
+import { RegistrarLogUseCase } from 'src/modules/auditoria/application/use-cases/registrar-log.use-case'
 
 export interface CrearPedidoItemInput {
   productId: string
@@ -29,7 +30,8 @@ export class CrearPedidoUseCase {
     @Inject(PEDIDO_REPOSITORY_PORT)
     private readonly pedidoRepository: PedidoRepositoryPort,
     @Inject(PRODUCTO_CONSULTA_PORT)
-    private readonly productoConsulta: ProductoConsultaPort
+    private readonly productoConsulta: ProductoConsultaPort,
+    private readonly registrarLogUseCase: RegistrarLogUseCase
   ) {}
 
   async execute(input: CrearPedidoInput): Promise<Pedido> {
@@ -80,7 +82,16 @@ export class CrearPedidoUseCase {
         }),
       })
 
-      return await this.pedidoRepository.save(pedido)
+      const pedidoGuardado = await this.pedidoRepository.save(pedido)
+
+      await this.registrarLogUseCase.execute({
+        usuarioId: input.clientId,
+        accion: 'CREAR_PEDIDO',
+        recursoAfectado: `Pedido:${pedidoGuardado.id}`,
+        detalle: `Pedido solicitado al productor Profile:${producerProfileId} con ${input.items.length} productos.`,
+      })
+
+      return pedidoGuardado
     } catch (error) {
       await this.liberarReservas(reservas)
       throw error

@@ -74,6 +74,7 @@ export class ProductosController {
   ): Promise<ProductoResponse> {
     const perfil = await this.producerProfileService.findOwn(usuario.id)
     const producto = await this.registrarProductoUseCase.execute({
+      usuarioId: usuario.id,
       producerProfileId: perfil.id,
       nombre: dto.nombre,
       descripcion: dto.descripcion,
@@ -137,6 +138,7 @@ export class ProductosController {
     const perfil = await this.producerProfileService.findOwn(usuario.id)
     const producto = await this.editarProductoUseCase.execute({
       id,
+      usuarioId: usuario.id,
       producerProfileId: perfil.id,
       ...dto,
     })
@@ -153,7 +155,11 @@ export class ProductosController {
     @CurrentUser() usuario: UsuarioAutenticado
   ): Promise<{ message: string }> {
     const perfil = await this.producerProfileService.findOwn(usuario.id)
-    await this.eliminarProductoUseCase.execute(id, perfil.id)
+    await this.eliminarProductoUseCase.execute({
+      id,
+      usuarioId: usuario.id,
+      producerProfileId: perfil.id,
+    })
     return { message: 'Producto eliminado correctamente.' }
   }
 

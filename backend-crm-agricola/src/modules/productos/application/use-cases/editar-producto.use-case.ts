@@ -2,9 +2,11 @@ import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nest
 import { Producto } from '../../domain/entities/producto'
 import { PRODUCTO_REPOSITORY_PORT } from '../../ports/out/producto-repository.port'
 import type { ProductoRepositoryPort } from '../../ports/out/producto-repository.port'
+import { RegistrarLogUseCase } from '../../../auditoria/application/use-cases/registrar-log.use-case'
 
 export interface EditarProductoInput {
   id: string
+  usuarioId: string
   producerProfileId: string
   nombre?: string
   descripcion?: string
@@ -18,7 +20,8 @@ export interface EditarProductoInput {
 export class EditarProductoUseCase {
   constructor(
     @Inject(PRODUCTO_REPOSITORY_PORT)
-    private readonly productoRepository: ProductoRepositoryPort
+    private readonly productoRepository: ProductoRepositoryPort,
+    private readonly registrarLogUseCase: RegistrarLogUseCase
   ) {}
 
   async execute(input: EditarProductoInput): Promise<Producto> {
@@ -36,6 +39,13 @@ export class EditarProductoUseCase {
     if (input.cantidad !== undefined) producto.cantidad = input.cantidad
     if (input.disponible !== undefined) producto.disponible = input.disponible
     producto.actualizadoEn = new Date()
+
+    await this.registrarLogUseCase.execute({
+      usuarioId: input.usuarioId,
+      accion: 'EDITAR_PRODUCTO',
+      recursoAfectado: `Producto:${input.id}`,
+      detalle: `Producto editado. Nombre: ${producto.nombre}`,
+    })
 
     return this.productoRepository.save(producto)
   }
