@@ -11,8 +11,18 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { ProducerProfileModule } from './producer-profile/producer-profile.module'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { SolicitudesArcoModule } from './modules/solicitudes-arco/solicitudes-arco.module'
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'
+import { APP_GUARD } from '@nestjs/core'
+
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 20,
+      },
+    ]),
+
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -41,6 +51,11 @@ import { SolicitudesArcoModule } from './modules/solicitudes-arco/solicitudes-ar
     SolicitudesArcoModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
