@@ -1,4 +1,5 @@
 import { RolUsuario } from '../../../../domain/value-objects/rol-usuario.enum'
+import { EstadoCuenta } from '../../../../domain/value-objects/estado-cuenta.enum'
 
 /**
  * DTO de respuesta para Usuario.
@@ -17,9 +18,17 @@ export class UsuarioResponseDto {
   name: string
   lastName: string
   email: string
-  phone: string
+  phone: string | null
   role: RolUsuario
   isActive: boolean
+  estadoCuenta: EstadoCuenta
+  privacyNoticeAcceptedAt: Date | null
+  privacyNoticeVersion: string | null
+  optionalPurposesAllowed: boolean
+  optionalPurposesUpdatedAt: Date | null
+  cancellationRequestedAt: Date | null
+  cancelledAt: Date | null
+  personalDataDisassociatedAt: Date | null
   createdAt: Date
   updatedAt: Date
 
@@ -28,9 +37,17 @@ export class UsuarioResponseDto {
     name: string
     lastName: string
     email: string
-    phone: string
+    phone: string | null
     role: RolUsuario
     isActive: boolean
+    estadoCuenta: EstadoCuenta
+    privacyNoticeAcceptedAt: Date | null
+    privacyNoticeVersion: string | null
+    optionalPurposesAllowed: boolean
+    optionalPurposesUpdatedAt: Date | null
+    cancellationRequestedAt: Date | null
+    cancelledAt: Date | null
+    personalDataDisassociatedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }) {
@@ -41,6 +58,14 @@ export class UsuarioResponseDto {
     this.phone = data.phone
     this.role = data.role
     this.isActive = data.isActive
+    this.estadoCuenta = data.estadoCuenta
+    this.privacyNoticeAcceptedAt = data.privacyNoticeAcceptedAt
+    this.privacyNoticeVersion = data.privacyNoticeVersion
+    this.optionalPurposesAllowed = data.optionalPurposesAllowed
+    this.optionalPurposesUpdatedAt = data.optionalPurposesUpdatedAt
+    this.cancellationRequestedAt = data.cancellationRequestedAt
+    this.cancelledAt = data.cancelledAt
+    this.personalDataDisassociatedAt = data.personalDataDisassociatedAt
     this.createdAt = data.createdAt
     this.updatedAt = data.updatedAt
   }
@@ -56,9 +81,17 @@ export class UsuarioResponseDto {
     name: string
     lastName: string
     email: string
-    phone: string
+    phone: string | null
     role: RolUsuario
     isActive: boolean
+    estadoCuenta: EstadoCuenta
+    privacyNoticeAcceptedAt: Date | null
+    privacyNoticeVersion: string | null
+    optionalPurposesAllowed: boolean
+    optionalPurposesUpdatedAt: Date | null
+    cancellationRequestedAt: Date | null
+    cancelledAt: Date | null
+    personalDataDisassociatedAt: Date | null
     createdAt: Date
     updatedAt: Date
     // passwordHash y refreshTokenHash pueden venir en el objeto de entrada
@@ -74,6 +107,14 @@ export class UsuarioResponseDto {
       phone: usuario.phone,
       role: usuario.role,
       isActive: usuario.isActive,
+      estadoCuenta: usuario.estadoCuenta,
+      privacyNoticeAcceptedAt: usuario.privacyNoticeAcceptedAt,
+      privacyNoticeVersion: usuario.privacyNoticeVersion,
+      optionalPurposesAllowed: usuario.optionalPurposesAllowed,
+      optionalPurposesUpdatedAt: usuario.optionalPurposesUpdatedAt,
+      cancellationRequestedAt: usuario.cancellationRequestedAt,
+      cancelledAt: usuario.cancelledAt,
+      personalDataDisassociatedAt: usuario.personalDataDisassociatedAt,
       createdAt: usuario.createdAt,
       updatedAt: usuario.updatedAt,
     })

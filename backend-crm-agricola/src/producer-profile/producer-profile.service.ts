@@ -1,33 +1,40 @@
 import {
-  Injectable,
-  NotFoundException,
   ConflictException,
   ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ILike, Repository } from 'typeorm'
-import { ProducerProfile } from './entities/producer-profile.entity'
+
+import { USUARIO_REPOSITORY_PORT } from 'src/modules/usuarios/ports/out/usuario-repository.port'
+import type { UsuarioRepositoryPort } from 'src/modules/usuarios/ports/out/usuario-repository.port'
 import {
   CreateProducerProfileDto,
-  UpdateProducerProfileDto,
-  PublicProducerProfileDto,
   PrivateProducerProfileDto,
+  PublicProducerProfileDto,
+  UpdateProducerProfileDto,
 } from './dto/producer-profile.dto'
+import { ProducerProfile } from './entities/producer-profile.entity'
 
 @Injectable()
 export class ProducerProfileService {
   constructor(
     @InjectRepository(ProducerProfile)
-    private readonly profileRepository: Repository<ProducerProfile>
-  ) {}
+    private readonly profileRepository: Repository<ProducerProfile>,
 
-  // ─── Crear perfil ────────────────────────────────────────────────────────
+    @Inject(USUARIO_REPOSITORY_PORT)
+    private readonly usuarioRepository: UsuarioRepositoryPort
+  ) {}
 
   async create(userId: string, dto: CreateProducerProfileDto): Promise<PrivateProducerProfileDto> {
     const existing = await this.profileRepository.findOne({ where: { userId } })
+
     if (existing) {
       throw new ConflictException('Ya tienes un perfil de productor registrado.')
     }
+
     const normalizedDto = this.normalizeCreateDto(dto)
     const profile = this.profileRepository.create({
       userId,
@@ -35,10 +42,9 @@ export class ProducerProfileService {
       socialLinks: normalizedDto.socialLinks ?? {},
     })
     const saved = await this.profileRepository.save(profile)
+
     return this.toPrivateDto(saved)
   }
-
-  // ─── Actualizar perfil ───────────────────────────────────────────────────
 
   async update(
     profileId: string,
@@ -49,42 +55,45 @@ export class ProducerProfileService {
     this.assertOwnership(profile, requestingUserId)
     Object.assign(profile, this.normalizeUpdateDto(dto))
     const saved = await this.profileRepository.save(profile)
+
     return this.toPrivateDto(saved)
   }
-
-  // ─── Ver perfil propio ───────────────────────────────────────────────────
 
   async findOwn(requestingUserId: string): Promise<PrivateProducerProfileDto> {
     const profile = await this.profileRepository.findOne({
       where: { userId: requestingUserId },
     })
+
     if (!profile) {
-      throw new NotFoundException('No tienes un perfil de productor todavía.')
+      throw new NotFoundException('No tienes un perfil de productor todavia.')
     }
+
     return this.toPrivateDto(profile)
   }
 
-  // ─── Ver perfil público por ID ───────────────────────────────────────────
-
   async findPublicById(profileId: string): Promise<PublicProducerProfileDto> {
     const profile = await this.findEntityOrFail(profileId)
-    if (!profile.isActive) {
-      throw new NotFoundException('Este perfil no está disponible.')
+
+    if (!(await this.isPubliclyAvailable(profile))) {
+      return this.toUnavailablePublicDto(profile)
     }
+
     return this.toPublicDto(profile)
   }
-
-  // ─── Ver perfil público por userId ──────────────────────────────────────
 
   async findPublicByUserId(userId: string): Promise<PublicProducerProfileDto> {
     const profile = await this.profileRepository.findOne({ where: { userId } })
-    if (!profile || !profile.isActive) {
+
+    if (!profile) {
       throw new NotFoundException('Perfil de productor no encontrado.')
     }
+
+    if (!(await this.isPubliclyAvailable(profile))) {
+      return this.toUnavailablePublicDto(profile)
+    }
+
     return this.toPublicDto(profile)
   }
-
-  // ─── NUEVO: Buscar por nombre comercial ─────────────────────────────────
 
   async searchByName(query: string): Promise<PublicProducerProfileDto[]> {
     if (!query || query.trim().length < 2) return []
@@ -97,11 +106,10 @@ export class ProducerProfileService {
       order: { businessName: 'ASC' },
       take: 20,
     })
+    const availableProfiles = await this.filterAvailableProfiles(profiles)
 
-    return profiles.map((p) => this.toPublicDto(p))
+    return availableProfiles.map((profile) => this.toPublicDto(profile))
   }
-
-  // ─── NUEVO: Listar recomendados (más recientes activos) ─────────────────
 
   async findRecommended(limit = 6): Promise<PublicProducerProfileDto[]> {
     const profiles = await this.profileRepository.find({
@@ -109,16 +117,18 @@ export class ProducerProfileService {
       order: { createdAt: 'DESC' },
       take: limit,
     })
-    return profiles.map((p) => this.toPublicDto(p))
-  }
+    const availableProfiles = await this.filterAvailableProfiles(profiles)
 
-  // ─── Helpers internos ────────────────────────────────────────────────────
+    return availableProfiles.map((profile) => this.toPublicDto(profile))
+  }
 
   private async findEntityOrFail(profileId: string): Promise<ProducerProfile> {
     const profile = await this.profileRepository.findOne({ where: { id: profileId } })
+
     if (!profile) {
       throw new NotFoundException(`Perfil con id '${profileId}' no encontrado.`)
     }
+
     return profile
   }
 
@@ -149,10 +159,12 @@ export class ProducerProfileService {
     if (dto.generalLocation !== undefined)
       normalizedDto.generalLocation = dto.generalLocation.trim()
     if (dto.contactPhone !== undefined) normalizedDto.contactPhone = dto.contactPhone.trim()
-    if (dto.contactEmail !== undefined)
+    if (dto.contactEmail !== undefined) {
       normalizedDto.contactEmail = dto.contactEmail.trim().toLowerCase()
-    if (dto.socialLinks !== undefined)
+    }
+    if (dto.socialLinks !== undefined) {
       normalizedDto.socialLinks = this.normalizeSocialLinks(dto.socialLinks)
+    }
     if (dto.internalNotes !== undefined) normalizedDto.internalNotes = dto.internalNotes.trim()
 
     return normalizedDto
@@ -168,7 +180,54 @@ export class ProducerProfileService {
     )
   }
 
+  private async filterAvailableProfiles(profiles: ProducerProfile[]): Promise<ProducerProfile[]> {
+    const availability = await Promise.all(
+      profiles.map(async (profile) => ({
+        profile,
+        isAvailable: await this.isPubliclyAvailable(profile),
+      }))
+    )
+
+    return availability.filter((item) => item.isAvailable).map((item) => item.profile)
+  }
+
+  private async isPubliclyAvailable(profile: ProducerProfile): Promise<boolean> {
+    const usuario = await this.usuarioRepository.findById(profile.userId)
+
+    return Boolean(profile.isActive && usuario?.isActive && !usuario.isCancelled())
+  }
+
   private toPublicDto(p: ProducerProfile): PublicProducerProfileDto {
+    return {
+      id: p.id,
+      businessName: p.businessName,
+      description: p.description,
+      generalLocation: p.generalLocation,
+      contactPhone: null,
+      contactEmail: null,
+      socialLinks: {},
+      isAvailable: true,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+    }
+  }
+
+  private toUnavailablePublicDto(p: ProducerProfile): PublicProducerProfileDto {
+    return {
+      id: p.id,
+      businessName: 'Productor no disponible',
+      description: 'Este productor no se encuentra disponible.',
+      generalLocation: null,
+      contactPhone: null,
+      contactEmail: null,
+      socialLinks: {},
+      isAvailable: false,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+    }
+  }
+
+  private toPrivateDto(p: ProducerProfile): PrivateProducerProfileDto {
     return {
       id: p.id,
       businessName: p.businessName,
@@ -177,14 +236,9 @@ export class ProducerProfileService {
       contactPhone: p.contactPhone,
       contactEmail: p.contactEmail,
       socialLinks: p.socialLinks ?? {},
+      isAvailable: p.isActive,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
-    }
-  }
-
-  private toPrivateDto(p: ProducerProfile): PrivateProducerProfileDto {
-    return {
-      ...this.toPublicDto(p),
       userId: p.userId,
       internalNotes: p.internalNotes,
       isActive: p.isActive,

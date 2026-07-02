@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
-import type { CookieOptions, Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
 import { IniciarSesionUseCase } from '../../../../application/use-cases/iniciar-sesion.use-case'
 import type { IniciarSesionInput } from '../../../../application/use-cases/iniciar-sesion.use-case'
@@ -27,24 +27,11 @@ import {
 import { CurrentUser } from '../decorators/current-user.decorator'
 import { JwtAuthGuard } from '../../passport/jwt-auth.guard'
 import type { UsuarioAutenticado } from '../../../../domain/entities/usuario-autenticado'
-import type { AuthTokens } from '../../../../ports/out/token-service.port'
-
-const ACCESS_TOKEN_COOKIE_NAME = 'accessToken'
-const REFRESH_TOKEN_COOKIE_NAME = 'refreshToken'
-const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000
-const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000
-
-function getCookieValue(request: Request, cookieName: string): string | null {
-  const cookies: unknown = request.cookies
-
-  if (!cookies || typeof cookies !== 'object') {
-    return null
-  }
-
-  const cookieValue = (cookies as Record<string, unknown>)[cookieName]
-
-  return typeof cookieValue === 'string' ? cookieValue : null
-}
+import {
+  clearAuthCookies,
+  getRefreshTokenFromCookie,
+  setAuthCookies,
+} from '../cookies/auth-cookies.util'
 
 function assertEmptyBody(body: unknown): void {
   if (body === undefined || body === null) return
@@ -78,7 +65,7 @@ export class AuthController {
 
     const tokens = await this.iniciarSesionUseCase.execute(input)
 
-    this.setAuthCookies(response, tokens)
+    setAuthCookies(response, tokens)
 
     return {
       message: 'Sesion iniciada correctamente.',
@@ -94,10 +81,10 @@ export class AuthController {
   ): Promise<{ message: string }> {
     assertEmptyBody(body)
 
-    const refreshToken = getCookieValue(request, REFRESH_TOKEN_COOKIE_NAME)
+    const refreshToken = getRefreshTokenFromCookie(request)
 
     if (!refreshToken) {
-      this.clearAuthCookies(response)
+      clearAuthCookies(response)
       throw new UnauthorizedException('No existe una sesion activa.')
     }
 
@@ -108,13 +95,13 @@ export class AuthController {
     try {
       const tokens = await this.refrescarTokenUseCase.execute(input)
 
-      this.setAuthCookies(response, tokens)
+      setAuthCookies(response, tokens)
 
       return {
         message: 'Sesion renovada correctamente.',
       }
     } catch (error) {
-      this.clearAuthCookies(response)
+      clearAuthCookies(response)
       throw error
     }
   }
@@ -128,7 +115,7 @@ export class AuthController {
   ): Promise<{ message: string }> {
     assertEmptyBody(body)
 
-    const refreshToken = getCookieValue(request, REFRESH_TOKEN_COOKIE_NAME)
+    const refreshToken = getRefreshTokenFromCookie(request)
 
     try {
       if (refreshToken) {
@@ -139,7 +126,7 @@ export class AuthController {
         await this.cerrarSesionUseCase.execute(input)
       }
     } finally {
-      this.clearAuthCookies(response)
+      clearAuthCookies(response)
     }
 
     return {
@@ -151,33 +138,5 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   obtenerUsuarioAutenticado(@CurrentUser() usuario: UsuarioAutenticado): UsuarioAutenticado {
     return usuario
-  }
-
-  private setAuthCookies(response: Response, tokens: AuthTokens): void {
-    response.cookie(ACCESS_TOKEN_COOKIE_NAME, tokens.accessToken, {
-      ...this.getBaseCookieOptions(),
-      maxAge: ACCESS_TOKEN_MAX_AGE,
-    })
-
-    response.cookie(REFRESH_TOKEN_COOKIE_NAME, tokens.refreshToken, {
-      ...this.getBaseCookieOptions(),
-      maxAge: REFRESH_TOKEN_MAX_AGE,
-    })
-  }
-
-  private clearAuthCookies(response: Response): void {
-    response.clearCookie(ACCESS_TOKEN_COOKIE_NAME, this.getBaseCookieOptions())
-    response.clearCookie(REFRESH_TOKEN_COOKIE_NAME, this.getBaseCookieOptions())
-  }
-
-  private getBaseCookieOptions(): CookieOptions {
-    const isProduction = process.env.NODE_ENV === 'production'
-
-    return {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
-      path: '/',
-    }
   }
 }
