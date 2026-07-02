@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
 
 import { Pedido } from '../../../../../domain/entities/pedido'
+import { EstadoPedido } from '../../../../../domain/value-objects/estado-pedido.enum'
 import { PedidoRepositoryPort } from '../../../../../ports/out/pedido-repository.port'
 import { PedidoEntity } from '../entities/pedido.entity'
 import { PedidoMapper } from '../mappers/pedido.mapper'
@@ -42,6 +43,27 @@ export class TypeormPedidoRepository implements PedidoRepositoryPort {
   async findByProducerProfileId(producerProfileId: string): Promise<Pedido[]> {
     const pedidos = await this.pedidoRepository.find({
       where: { producerProfileId },
+      order: { createdAt: 'DESC' },
+    })
+
+    return pedidos.map((pedido) => PedidoMapper.toDomain(pedido))
+  }
+
+  async findByClientIdAndEstados(clientId: string, estados: EstadoPedido[]): Promise<Pedido[]> {
+    const pedidos = await this.pedidoRepository.find({
+      where: { clientId, estado: In(estados) },
+      order: { createdAt: 'DESC' },
+    })
+
+    return pedidos.map((pedido) => PedidoMapper.toDomain(pedido))
+  }
+
+  async findByProducerProfileIdAndEstados(
+    producerProfileId: string,
+    estados: EstadoPedido[]
+  ): Promise<Pedido[]> {
+    const pedidos = await this.pedidoRepository.find({
+      where: { producerProfileId, estado: In(estados) },
       order: { createdAt: 'DESC' },
     })
 

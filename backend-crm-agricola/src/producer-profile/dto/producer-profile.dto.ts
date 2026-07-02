@@ -124,6 +124,7 @@ export class PublicProducerProfileDto {
   contactPhone!: string | null
   contactEmail!: string | null
   socialLinks!: Record<string, string>
+  isAvailable!: boolean
   createdAt!: Date
   updatedAt!: Date
 }

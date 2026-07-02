@@ -1,4 +1,4 @@
-import { IsEmail, IsString, Matches, MaxLength } from 'class-validator'
+import { IsEmail, IsOptional, IsString, Matches, MaxLength } from 'class-validator'
 import {
   IsOptionalButNotNull,
   IsSafeText,
@@ -25,10 +25,10 @@ export class EditarUsuarioDto {
   @MaxLength(150)
   email!: string
 
-  @IsOptionalButNotNull()
+  @IsOptional()
   @IsString()
   @Matches(/^[0-9]{10}$/, {
     message: 'El teléfono debe contener exactamente 10 dígitos.',
   })
-  phone!: string
+  phone?: string | null
 }

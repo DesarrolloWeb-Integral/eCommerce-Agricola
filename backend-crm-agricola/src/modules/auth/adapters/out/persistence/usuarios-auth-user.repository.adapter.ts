@@ -25,6 +25,7 @@ export class UsuariosAuthUserRepositoryAdapter implements AuthUserRepositoryPort
       refreshTokenHash: usuario.refreshTokenHash,
       role: usuario.role,
       isActive: usuario.isActive,
+      estadoCuenta: usuario.estadoCuenta,
     }
   }
 
@@ -42,6 +43,7 @@ export class UsuariosAuthUserRepositoryAdapter implements AuthUserRepositoryPort
       refreshTokenHash: usuario.refreshTokenHash,
       role: usuario.role,
       isActive: usuario.isActive,
+      estadoCuenta: usuario.estadoCuenta,
     }
   }
 

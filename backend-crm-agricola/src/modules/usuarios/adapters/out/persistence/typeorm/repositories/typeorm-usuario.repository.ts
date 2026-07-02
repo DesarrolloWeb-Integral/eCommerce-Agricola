@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
 import { Usuario } from '../../../../../domain/entities/usuario'
+import type { EstadoCuenta } from '../../../../../domain/value-objects/estado-cuenta.enum'
 import { UsuarioRepositoryPort } from '../../../../../ports/out/usuario-repository.port'
 import { UsuarioEntity } from '../entities/usuario.entity'
 import { UsuarioMapper } from '../mappers/usuario.mapper'
@@ -76,5 +77,14 @@ export class TypeormUsuarioRepository implements UsuarioRepositoryPort {
     }
 
     return UsuarioMapper.toDomain(usuarioEntity)
+  }
+
+  async findByEstadoCuenta(estadoCuenta: EstadoCuenta): Promise<Usuario[]> {
+    const usuarios = await this.usuarioRepository.find({
+      where: { estadoCuenta },
+      order: { cancellationRequestedAt: 'ASC', updatedAt: 'ASC' },
+    })
+
+    return usuarios.map((usuario) => UsuarioMapper.toDomain(usuario))
   }
 }

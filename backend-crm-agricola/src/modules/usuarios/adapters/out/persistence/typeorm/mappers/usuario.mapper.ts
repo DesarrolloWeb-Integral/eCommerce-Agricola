@@ -13,6 +13,14 @@ export class UsuarioMapper {
       usuarioEntity.refreshTokenHash,
       usuarioEntity.role,
       usuarioEntity.isActive,
+      usuarioEntity.estadoCuenta,
+      usuarioEntity.privacyNoticeAcceptedAt,
+      usuarioEntity.privacyNoticeVersion,
+      usuarioEntity.optionalPurposesAllowed,
+      usuarioEntity.optionalPurposesUpdatedAt,
+      usuarioEntity.cancellationRequestedAt,
+      usuarioEntity.cancelledAt,
+      usuarioEntity.personalDataDisassociatedAt,
       usuarioEntity.createdAt,
       usuarioEntity.updatedAt,
       usuarioEntity.deletedAt
@@ -31,6 +39,14 @@ export class UsuarioMapper {
     usuarioEntity.refreshTokenHash = usuario.refreshTokenHash
     usuarioEntity.role = usuario.role
     usuarioEntity.isActive = usuario.isActive
+    usuarioEntity.estadoCuenta = usuario.estadoCuenta
+    usuarioEntity.privacyNoticeAcceptedAt = usuario.privacyNoticeAcceptedAt
+    usuarioEntity.privacyNoticeVersion = usuario.privacyNoticeVersion
+    usuarioEntity.optionalPurposesAllowed = usuario.optionalPurposesAllowed
+    usuarioEntity.optionalPurposesUpdatedAt = usuario.optionalPurposesUpdatedAt
+    usuarioEntity.cancellationRequestedAt = usuario.cancellationRequestedAt
+    usuarioEntity.cancelledAt = usuario.cancelledAt
+    usuarioEntity.personalDataDisassociatedAt = usuario.personalDataDisassociatedAt
     usuarioEntity.createdAt = usuario.createdAt
     usuarioEntity.updatedAt = usuario.updatedAt
     usuarioEntity.deletedAt = usuario.deletedAt

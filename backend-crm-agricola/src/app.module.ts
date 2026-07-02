@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ProducerProfileModule } from './producer-profile/producer-profile.module'
 import { EventEmitterModule } from '@nestjs/event-emitter'
+import { SolicitudesArcoModule } from './modules/solicitudes-arco/solicitudes-arco.module'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,6 +38,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter'
     PedidosModule,
     PagosComisionesModule,
     ProducerProfileModule,
+    SolicitudesArcoModule,
   ],
   controllers: [],
   providers: [],

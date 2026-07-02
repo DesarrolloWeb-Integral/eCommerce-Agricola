@@ -1,4 +1,13 @@
-import { IsEmail, IsIn, IsString, Matches, MaxLength, MinLength } from 'class-validator'
+import {
+  IsBoolean,
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator'
 import { IsSafeText, IsTrimmedNotEmpty } from 'src/shared/validation/security.validators'
 import { RolUsuario } from 'src/modules/usuarios/domain/value-objects/rol-usuario.enum'
 
@@ -19,11 +28,12 @@ export class RegistrarUsuarioDto {
   @MaxLength(150)
   email!: string
 
+  @IsOptional()
   @IsString()
   @Matches(/^[0-9]{10}$/, {
     message: 'El teléfono debe contener exactamente 10 dígitos.',
   })
-  phone!: string
+  phone?: string | null
 
   @IsString()
   @IsTrimmedNotEmpty({ message: 'La contraseña es obligatoria.' })
@@ -35,4 +45,7 @@ export class RegistrarUsuarioDto {
     message: 'El rol debe ser CLIENTE o PROVEEDOR.',
   })
   role!: RolUsuario
+
+  @IsBoolean({ message: 'Debes aceptar el Aviso de Privacidad.' })
+  privacyNoticeAccepted!: boolean
 }

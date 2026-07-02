@@ -11,20 +11,25 @@ import { BuscarUsuarioPorTelefonoUseCase } from './application/use-cases/buscar-
 import { DesactivarUsuarioUseCase } from './application/use-cases/desactivar-usuario.use-case'
 import { EditarUsuarioUseCase } from './application/use-cases/editar-usuario.use-case'
 import { RegistrarUsuarioUseCase } from './application/use-cases/registrar-usuario.use-case'
+import { ActualizarConsentimientosUseCase } from './application/use-cases/actualizar-consentimientos.use-case'
 import { PASSWORD_HASHER_PORT } from './ports/out/password-hasher.port'
 import { USUARIO_REPOSITORY_PORT } from './ports/out/usuario-repository.port'
 import { AuditoriaModule } from '../auditoria/auditoria.module'
+import { PrivacyConsentsModule } from '../privacy-consents/privacy-consents.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsuarioEntity]), AuditoriaModule],
+  imports: [TypeOrmModule.forFeature([UsuarioEntity])],
   controllers: [UsuariosController],
   providers: [
+    AuditoriaModule,
+    PrivacyConsentsModule,
     RegistrarUsuarioUseCase,
     BuscarUsuarioPorIdUseCase,
     BuscarUsuarioPorEmailUseCase,
     BuscarUsuarioPorTelefonoUseCase,
     EditarUsuarioUseCase,
     DesactivarUsuarioUseCase,
+    ActualizarConsentimientosUseCase,
     TypeormUsuarioRepository,
     BcryptPasswordHasherAdapter,
     {

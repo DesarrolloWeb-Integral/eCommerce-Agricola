@@ -1,4 +1,5 @@
 import { Usuario } from '../../domain/entities/usuario'
+import type { EstadoCuenta } from '../../domain/value-objects/estado-cuenta.enum'
 
 export const USUARIO_REPOSITORY_PORT = Symbol('USUARIO_REPOSITORY_PORT')
 
@@ -9,4 +10,5 @@ export interface UsuarioRepositoryPort {
   findByEmailIncludingDeleted(email: string): Promise<Usuario | null>
   findByPhoneIncludingDeleted(phone: string): Promise<Usuario | null>
   findById(id: string): Promise<Usuario | null>
+  findByEstadoCuenta(estadoCuenta: EstadoCuenta): Promise<Usuario[]>
 }

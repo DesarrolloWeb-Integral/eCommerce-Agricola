@@ -7,6 +7,7 @@ import { TOKEN_SERVICE_PORT } from '../../ports/out/token-service.port'
 import type { AuthTokens, JwtPayload, TokenServicePort } from '../../ports/out/token-service.port'
 import { PASSWORD_HASHER_PORT } from '../../../usuarios/ports/out/password-hasher.port'
 import type { PasswordHasherPort } from '../../../usuarios/ports/out/password-hasher.port'
+import { EstadoCuenta } from '../../../usuarios/domain/value-objects/estado-cuenta.enum'
 
 export interface RefrescarTokenInput {
   refreshToken: string
@@ -30,7 +31,12 @@ export class RefrescarTokenUseCase {
 
     const usuario = await this.authUserRepository.findById(payload.sub)
 
-    if (!usuario || !usuario.isActive || !usuario.refreshTokenHash) {
+    if (
+      !usuario ||
+      !usuario.isActive ||
+      usuario.estadoCuenta === EstadoCuenta.CANCELADA ||
+      !usuario.refreshTokenHash
+    ) {
       throw new UnauthorizedException('El refresh token no es válido o ya expiró.')
     }
 

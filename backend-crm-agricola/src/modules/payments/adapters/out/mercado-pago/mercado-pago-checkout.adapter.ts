@@ -90,10 +90,25 @@ export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
       return null
     }
 
+    if (![success, failure, pending].every((url) => this.isPublicHttpsUrl(url))) {
+      return null
+    }
+
     return {
       success,
       failure,
       pending,
+    }
+  }
+
+  private isPublicHttpsUrl(value: string): boolean {
+    try {
+      const url = new URL(value)
+      const invalidHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', 'servidor'])
+
+      return url.protocol === 'https:' && !invalidHosts.has(url.hostname)
+    } catch {
+      return false
     }
   }
 }

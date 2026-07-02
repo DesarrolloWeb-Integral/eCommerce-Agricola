@@ -8,6 +8,7 @@ import { PASSWORD_HASHER_PORT } from '../../../usuarios/ports/out/password-hashe
 import type { PasswordHasherPort } from '../../../usuarios/ports/out/password-hasher.port'
 import type { AuthUserRepositoryPort } from '../../ports/out/auth-user.repository.port'
 import { RegistrarLogUseCase } from '../../../auditoria/application/use-cases/registrar-log.use-case'
+import { EstadoCuenta } from '../../../usuarios/domain/value-objects/estado-cuenta.enum'
 
 export interface IniciarSesionInput {
   email: string
@@ -43,6 +44,10 @@ export class IniciarSesionUseCase {
       })
 
       throw new UnauthorizedException('Correo electrónico o contraseña incorrectos.')
+    }
+
+    if (usuario.estadoCuenta === EstadoCuenta.CANCELADA) {
+      throw new ForbiddenException('La cuenta se encuentra cancelada.')
     }
 
     if (!usuario.isActive) {
