@@ -18,7 +18,7 @@ import { AuditoriaModule } from '../auditoria/auditoria.module'
 import { PrivacyConsentsModule } from '../privacy-consents/privacy-consents.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsuarioEntity])],
+  imports: [TypeOrmModule.forFeature([UsuarioEntity]), PrivacyConsentsModule],
   controllers: [UsuariosController],
   providers: [
     AuditoriaModule,
