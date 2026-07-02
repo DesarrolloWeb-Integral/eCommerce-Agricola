@@ -8,6 +8,7 @@ import type { UsuarioAutenticado } from '../../../domain/entities/usuario-autent
 import { AUTH_USER_REPOSITORY_PORT } from '../../../ports/out/auth-user.repository.port'
 import type { AuthUserRepositoryPort } from '../../../ports/out/auth-user.repository.port'
 import type { JwtPayload } from '../../../ports/out/token-service.port'
+import { EstadoCuenta } from 'src/modules/usuarios/domain/value-objects/estado-cuenta.enum'
 
 const ACCESS_TOKEN_COOKIE_NAME = 'accessToken'
 
@@ -44,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload): Promise<UsuarioAutenticado> {
     const usuario = await this.authUserRepository.findById(payload.sub)
 
-    if (!usuario || !usuario.isActive) {
+    if (!usuario || !usuario.isActive || usuario.estadoCuenta === EstadoCuenta.CANCELADA) {
       throw new UnauthorizedException('El usuario autenticado no está disponible.')
     }
 

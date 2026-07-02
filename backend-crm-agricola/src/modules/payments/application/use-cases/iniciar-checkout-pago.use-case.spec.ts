@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common'
 
 import { EstadoPedido } from '../../../pedidos/domain/value-objects/estado-pedido.enum'
+import { EstadoPago } from '../../domain/value-objects/estado-pago.enum'
 import type { Pago } from '../../domain/entities/pago'
 import { ComisionPorcentajeFijoStrategy } from '../../domain/strategies/comision-porcentaje-fijo.strategy'
 import type {
@@ -24,6 +25,10 @@ describe('IniciarCheckoutPagoUseCase', () => {
   const findPagoById = jest.fn<Promise<Pago | null>, [string]>()
   const findPagoByPedidoId = jest.fn<Promise<Pago | null>, [string]>()
   const findPagoByMercadoPagoPaymentId = jest.fn<Promise<Pago | null>, [string]>()
+  const findPagosByClientId = jest.fn<Promise<Pago[]>, [string]>()
+  const findPagosByProducerProfileId = jest.fn<Promise<Pago[]>, [string]>()
+  const findPagosByClientIdAndEstados = jest.fn<Promise<Pago[]>, [string, EstadoPago[]]>()
+  const findPagosByProducerProfileIdAndEstados = jest.fn<Promise<Pago[]>, [string, EstadoPago[]]>()
   const crearCheckout = jest.fn<Promise<CheckoutMercadoPago>, [CrearCheckoutMercadoPagoInput]>()
 
   const pedidoConsulta: PedidoConsultaPagoPort = {
@@ -35,6 +40,10 @@ describe('IniciarCheckoutPagoUseCase', () => {
     findById: findPagoById,
     findByPedidoId: findPagoByPedidoId,
     findByMercadoPagoPaymentId: findPagoByMercadoPagoPaymentId,
+    findByClientId: findPagosByClientId,
+    findByProducerProfileId: findPagosByProducerProfileId,
+    findByClientIdAndEstados: findPagosByClientIdAndEstados,
+    findByProducerProfileIdAndEstados: findPagosByProducerProfileIdAndEstados,
   }
 
   const mercadoPagoCheckout: MercadoPagoCheckoutPort = {

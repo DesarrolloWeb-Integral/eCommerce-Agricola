@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
 
 import { Pago } from '../../../../../domain/entities/pago'
+import { EstadoPago } from '../../../../../domain/value-objects/estado-pago.enum'
 import { PagoRepositoryPort } from '../../../../../ports/out/pago-repository.port'
 import { PagoEntity } from '../entities/pago.entity'
 import { PagoMapper } from '../mappers/pago.mapper'
@@ -43,5 +44,44 @@ export class TypeormPagoRepository implements PagoRepositoryPort {
     })
 
     return pagoEntity ? PagoMapper.toDomain(pagoEntity) : null
+  }
+
+  async findByClientId(clientId: string): Promise<Pago[]> {
+    const entities = await this.pagoRepository.find({
+      where: { clientId },
+      order: { creadoEn: 'DESC' },
+    })
+
+    return entities.map((entity) => PagoMapper.toDomain(entity))
+  }
+
+  async findByProducerProfileId(producerProfileId: string): Promise<Pago[]> {
+    const entities = await this.pagoRepository.find({
+      where: { producerProfileId },
+      order: { creadoEn: 'DESC' },
+    })
+
+    return entities.map((entity) => PagoMapper.toDomain(entity))
+  }
+
+  async findByClientIdAndEstados(clientId: string, estados: EstadoPago[]): Promise<Pago[]> {
+    const entities = await this.pagoRepository.find({
+      where: { clientId, estado: In(estados) },
+      order: { creadoEn: 'DESC' },
+    })
+
+    return entities.map((entity) => PagoMapper.toDomain(entity))
+  }
+
+  async findByProducerProfileIdAndEstados(
+    producerProfileId: string,
+    estados: EstadoPago[]
+  ): Promise<Pago[]> {
+    const entities = await this.pagoRepository.find({
+      where: { producerProfileId, estado: In(estados) },
+      order: { creadoEn: 'DESC' },
+    })
+
+    return entities.map((entity) => PagoMapper.toDomain(entity))
   }
 }
