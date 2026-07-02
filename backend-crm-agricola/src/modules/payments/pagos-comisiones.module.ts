@@ -73,5 +73,6 @@ import { MERCADO_PAGO_WEBHOOK_SIGNATURE_PORT } from './ports/out/mercado-pago-we
       useExisting: MercadoPagoWebhookSignatureAdapter,
     },
   ],
+  exports: [PAGO_REPOSITORY_PORT],
 })
 export class PagosComisionesModule {}

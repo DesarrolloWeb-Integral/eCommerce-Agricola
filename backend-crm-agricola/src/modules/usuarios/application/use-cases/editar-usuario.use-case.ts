@@ -1,4 +1,10 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 
 import type { Usuario } from '../../domain/entities/usuario'
 import { USUARIO_REPOSITORY_PORT } from '../../ports/out/usuario-repository.port'
@@ -9,7 +15,7 @@ export interface EditarUsuarioInput {
   name?: string
   lastName?: string
   email?: string
-  phone?: string
+  phone?: string | null
 }
 
 @Injectable()
@@ -26,8 +32,12 @@ export class EditarUsuarioUseCase {
       throw new NotFoundException('Usuario no encontrado.')
     }
 
+    if (usuario.isCancelled()) {
+      throw new BadRequestException('No es posible modificar una cuenta cancelada.')
+    }
+
     const email = input.email?.trim().toLowerCase()
-    const phone = input.phone?.trim()
+    const phone = this.normalizeOptionalPhone(input.phone)
 
     await this.validateUniqueData(usuario.id, email, phone)
 
@@ -44,7 +54,7 @@ export class EditarUsuarioUseCase {
   private async validateUniqueData(
     currentUserId: string,
     email?: string,
-    phone?: string
+    phone?: string | null
   ): Promise<void> {
     const [usuarioConMismoEmail, usuarioConMismoTelefono] = await Promise.all([
       email ? this.usuarioRepository.findByEmailIncludingDeleted(email) : Promise.resolve(null),
@@ -58,5 +68,15 @@ export class EditarUsuarioUseCase {
     if (usuarioConMismoTelefono && usuarioConMismoTelefono.id !== currentUserId) {
       throw new ConflictException('Ya existe un usuario registrado con este número telefónico.')
     }
+  }
+
+  private normalizeOptionalPhone(phone: string | null | undefined): string | null | undefined {
+    if (phone === undefined) {
+      return undefined
+    }
+
+    const normalizedPhone = phone?.trim() ?? ''
+
+    return normalizedPhone.length > 0 ? normalizedPhone : null
   }
 }

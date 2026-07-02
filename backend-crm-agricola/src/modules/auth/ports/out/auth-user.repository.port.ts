@@ -1,4 +1,5 @@
 import type { RolUsuario } from '../../../usuarios/domain/value-objects/rol-usuario.enum'
+import type { EstadoCuenta } from '../../../usuarios/domain/value-objects/estado-cuenta.enum'
 
 export interface AuthUser {
   id: string
@@ -7,6 +8,7 @@ export interface AuthUser {
   refreshTokenHash: string | null
   role: RolUsuario
   isActive: boolean
+  estadoCuenta: EstadoCuenta
 }
 
 export const AUTH_USER_REPOSITORY_PORT = Symbol('AUTH_USER_REPOSITORY_PORT')

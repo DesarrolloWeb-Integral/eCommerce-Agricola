@@ -1,20 +1,36 @@
-import { ConflictException, ForbiddenException, Inject, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common'
 import { randomUUID } from 'node:crypto'
 
 import { Usuario } from '../../domain/entities/usuario'
+import { EstadoCuenta } from '../../domain/value-objects/estado-cuenta.enum'
 import { PASSWORD_HASHER_PORT } from '../../ports/out/password-hasher.port'
 import type { PasswordHasherPort } from '../../ports/out/password-hasher.port'
 import { USUARIO_REPOSITORY_PORT } from '../../ports/out/usuario-repository.port'
 import type { UsuarioRepositoryPort } from '../../ports/out/usuario-repository.port'
 import { RolUsuario } from '../../domain/value-objects/rol-usuario.enum'
+import { PRIVACY_DOCUMENTS_CONFIG } from 'src/modules/privacy-consents/privacy-documents.config'
+import { PrivacyConsentLog } from 'src/modules/privacy-consents/domain/entities/privacy-consent-log'
+import { PrivacyConsentAction } from 'src/modules/privacy-consents/domain/value-objects/privacy-consent-action.enum'
+import { PrivacyDocumentType } from 'src/modules/privacy-consents/domain/value-objects/privacy-document-type.enum'
+import {
+  PRIVACY_CONSENT_LOG_REPOSITORY_PORT,
+  type PrivacyConsentLogRepositoryPort,
+} from 'src/modules/privacy-consents/ports/out/privacy-consent-log-repository.port'
 
 export interface RegistrarUsuarioInput {
   name: string
   lastName: string
   email: string
-  phone: string
+  phone?: string | null
   password: string
   role: RolUsuario
+  privacyNoticeAccepted: boolean
 }
 
 @Injectable()
@@ -24,12 +40,17 @@ export class RegistrarUsuarioUseCase {
     private readonly usuarioRepository: UsuarioRepositoryPort,
 
     @Inject(PASSWORD_HASHER_PORT)
-    private readonly passwordHasher: PasswordHasherPort
+    private readonly passwordHasher: PasswordHasherPort,
+
+    @Inject(PRIVACY_CONSENT_LOG_REPOSITORY_PORT)
+    private readonly privacyConsentLogRepository: PrivacyConsentLogRepositoryPort
   ) {}
 
   async execute(input: RegistrarUsuarioInput): Promise<Usuario> {
+    this.validateRequiredConsents(input)
+
     const email = input.email.trim().toLowerCase()
-    const phone = input.phone.trim()
+    const phone = this.normalizePhone(input.phone)
 
     await this.validateUniqueData(email, phone)
     this.validatePublicRole(input.role)
@@ -48,18 +69,51 @@ export class RegistrarUsuarioUseCase {
       null,
       input.role,
       true,
+      EstadoCuenta.ACTIVA,
+      null,
+      null,
+      false,
+      null,
+      null,
+      null,
+      null,
       now,
       now,
       null
     )
 
-    return this.usuarioRepository.save(usuario)
+    usuario.recordPrivacyNoticeConsent({
+      acceptedAt: now,
+      privacyNoticeVersion: PRIVACY_DOCUMENTS_CONFIG.privacyNoticeVersion,
+    })
+
+    const savedUsuario = await this.usuarioRepository.save(usuario)
+
+    await this.privacyConsentLogRepository.save(
+      new PrivacyConsentLog(
+        randomUUID(),
+        savedUsuario.id,
+        PrivacyDocumentType.PRIVACY_NOTICE,
+        PRIVACY_DOCUMENTS_CONFIG.privacyNoticeVersion,
+        now,
+        PrivacyConsentAction.ACCEPTED,
+        now
+      )
+    )
+
+    return savedUsuario
   }
 
-  private async validateUniqueData(email: string, phone: string): Promise<void> {
+  private validateRequiredConsents(input: RegistrarUsuarioInput): void {
+    if (input.privacyNoticeAccepted !== true) {
+      throw new BadRequestException('Debes aceptar el Aviso de Privacidad para registrarte.')
+    }
+  }
+
+  private async validateUniqueData(email: string, phone: string | null): Promise<void> {
     const [usuarioConMismoEmail, usuarioConMismoTelefono] = await Promise.all([
       this.usuarioRepository.findByEmailIncludingDeleted(email),
-      this.usuarioRepository.findByPhoneIncludingDeleted(phone),
+      phone ? this.usuarioRepository.findByPhoneIncludingDeleted(phone) : Promise.resolve(null),
     ])
 
     if (usuarioConMismoEmail) {
@@ -81,6 +135,12 @@ export class RegistrarUsuarioUseCase {
 
       throw new ConflictException('Ya existe un usuario registrado con este número telefónico.')
     }
+  }
+
+  private normalizePhone(phone: string | null | undefined): string | null {
+    const normalizedPhone = phone?.trim() ?? ''
+
+    return normalizedPhone.length > 0 ? normalizedPhone : null
   }
 
   private validatePublicRole(role: RolUsuario): void {

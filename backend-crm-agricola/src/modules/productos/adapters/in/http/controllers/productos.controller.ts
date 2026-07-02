@@ -182,9 +182,15 @@ export class ProductosController {
   async porProductor(
     @Param('producerProfileId', ParseUUIDPipe) producerProfileId: string
   ): Promise<ProductoResponse[]> {
+    const productor = await this.producerProfileService.findPublicById(producerProfileId)
+
+    if (!productor.isAvailable) {
+      return []
+    }
+
     const productos = await this.listarProductosUseCase.ejecutarPorProductor(producerProfileId)
     // Solo se muestran los disponibles al público
-    return productos.filter((p) => p.disponible).map((p) => this.toResponse(p))
+    return productos.filter((p) => p.disponible && p.cantidad > 0).map((p) => this.toResponse(p))
   }
 
   private toResponse(p: {
