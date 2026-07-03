@@ -14,21 +14,26 @@ import {
 import { ProducerProfileService } from './producer-profile.service'
 import { CreateProducerProfileDto, UpdateProducerProfileDto } from './dto/producer-profile.dto'
 import { JwtAuthGuard } from '../modules/auth/adapters/in/passport/jwt-auth.guard'
+import { RolesGuard } from '../modules/auth/adapters/in/passport/roles.guard'
 import { CurrentUser } from '../modules/auth/adapters/in/http/decorators/current-user.decorator'
+import { Roles } from '../modules/auth/adapters/in/http/decorators/roles.decorator'
 import type { UsuarioAutenticado } from '../modules/auth/domain/entities/usuario-autenticado'
+import { RolUsuario } from '../modules/usuarios/domain/value-objects/rol-usuario.enum'
 
 @Controller('producer-profiles')
 export class ProducerProfileController {
   constructor(private readonly service: ProducerProfileService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.PROVEEDOR)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user: UsuarioAutenticado, @Body() dto: CreateProducerProfileDto) {
     return this.service.create(user.id, dto)
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.PROVEEDOR)
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -38,7 +43,8 @@ export class ProducerProfileController {
     return this.service.update(id, user.id, dto)
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.PROVEEDOR)
   @Get('me')
   findOwn(@CurrentUser() user: UsuarioAutenticado) {
     return this.service.findOwn(user.id)
