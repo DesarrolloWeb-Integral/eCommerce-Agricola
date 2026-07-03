@@ -52,30 +52,22 @@ export function AppRoutes() {
 
         <Route path="/dashboard/mi-cuenta" element={<AccountPage />} />
 
-        <Route path="/dashboard/cliente" element={<ClientDashboardPage />} />
-
-        <Route path="/dashboard/cliente/productos" element={<CatalogoProductosPage />} />
-
-        <Route path="/dashboard/cliente/pedidos" element={<MyOrdersPage />} />
-
-        <Route path="/dashboard/proveedor" element={<ProviderDashboardPage />} />
-
-        {/* Perfil del productor */}
-        <Route path="/dashboard/proveedor/perfil" element={<ProducerProfilePage />} />
-
-        <Route path="/dashboard/administrador" element={<AdminDashboardPage />} />
-
-        <Route path="/dashboard/proveedor/productos" element={<MisProductosPage />} />
-
         <Route element={<RoleRoute allowedRoles={['CLIENTE']} />}>
+          <Route path="/dashboard/cliente" element={<ClientDashboardPage />} />
+          <Route path="/dashboard/cliente/productos" element={<CatalogoProductosPage />} />
+          <Route path="/dashboard/cliente/pedidos" element={<MyOrdersPage />} />
           <Route path="/dashboard/cliente/pedidos/nuevo" element={<CreateOrderPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['PROVEEDOR']} />}>
+          <Route path="/dashboard/proveedor" element={<ProviderDashboardPage />} />
+          <Route path="/dashboard/proveedor/perfil" element={<ProducerProfilePage />} />
+          <Route path="/dashboard/proveedor/productos" element={<MisProductosPage />} />
           <Route path="/dashboard/proveedor/pedidos" element={<OrdersForMyProductsPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['ADMINISTRADOR']} />}>
+          <Route path="/dashboard/administrador" element={<AdminDashboardPage />} />
           <Route path="/usuarios" element={<GetUserByIdPage />} />
           <Route path="/auditoria" element={<AuditLogsPage />} />
         </Route>
