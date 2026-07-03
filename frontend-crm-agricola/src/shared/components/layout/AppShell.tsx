@@ -44,23 +44,26 @@ export function AppShell({ children }: AppShellProps) {
           </Link>
 
           <div className="d-flex align-items-center gap-2">
-            {user && (
-              <span className="badge text-bg-light border text-secondary d-none d-md-inline-flex align-items-center gap-1">
-                <i className="bi bi-person-badge text-success" aria-hidden="true" />
-                {user.role}
-              </span>
-            )}
-
             {isAuthenticated ? (
-              <button
-                type="button"
-                className="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2"
-                aria-label="Cerrar sesión"
-                onClick={() => void handleLogout()}
-              >
-                <i className="bi bi-box-arrow-right" aria-hidden="true" />
-                <span className="d-none d-sm-inline">Cerrar sesión</span>
-              </button>
+              <>
+                <Link
+                  to="/dashboard/mi-cuenta"
+                  className="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-2"
+                >
+                  <i className="bi bi-person-circle" aria-hidden="true" />
+                  <span className="d-none d-sm-inline">Mi cuenta</span>
+                </Link>
+
+                <button
+                  type="button"
+                  className="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2"
+                  aria-label="Cerrar sesión"
+                  onClick={() => void handleLogout()}
+                >
+                  <i className="bi bi-box-arrow-right" aria-hidden="true" />
+                  <span className="d-none d-sm-inline">Cerrar sesión</span>
+                </button>
+              </>
             ) : (
               !isInitializing && (
                 <Link
