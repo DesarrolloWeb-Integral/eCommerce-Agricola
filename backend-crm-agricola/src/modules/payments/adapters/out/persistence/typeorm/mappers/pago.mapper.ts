@@ -15,6 +15,8 @@ export class PagoMapper {
       entity.estado,
       entity.mercadoPagoPreferenceId,
       entity.mercadoPagoPaymentId,
+      entity.proveedorExterno,
+      entity.consentimientoExternoVersion,
       entity.consentimientoExternoAceptadoEn,
       entity.creadoEn,
       entity.actualizadoEn
@@ -35,6 +37,8 @@ export class PagoMapper {
     entity.estado = pago.estado
     entity.mercadoPagoPreferenceId = pago.mercadoPagoPreferenceId
     entity.mercadoPagoPaymentId = pago.mercadoPagoPaymentId
+    entity.proveedorExterno = pago.proveedorExterno
+    entity.consentimientoExternoVersion = pago.consentimientoExternoVersion
     entity.consentimientoExternoAceptadoEn = pago.consentimientoExternoAceptadoEn
     entity.creadoEn = pago.creadoEn
     entity.actualizadoEn = pago.actualizadoEn

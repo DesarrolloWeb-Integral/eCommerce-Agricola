@@ -79,6 +79,22 @@ export class PagoEntity {
   mercadoPagoPaymentId!: string | null
 
   @Column({
+    type: 'varchar',
+    length: 50,
+    name: 'proveedor_externo',
+    default: 'MERCADO_PAGO',
+  })
+  proveedorExterno!: string
+
+  @Column({
+    type: 'varchar',
+    length: 80,
+    name: 'consentimiento_externo_version',
+    default: 'MERCADO_PAGO_TRANSFER_V1',
+  })
+  consentimientoExternoVersion!: string
+
+  @Column({
     type: 'timestamp with time zone',
     name: 'consentimiento_externo_aceptado_en',
   })

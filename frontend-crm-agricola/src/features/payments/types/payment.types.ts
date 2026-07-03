@@ -7,7 +7,7 @@ export interface PaymentSummary {
 }
 
 export interface StartCheckoutRequest {
-  acceptedExternalPaymentConsent: true;
+  acceptedExternalPaymentConsent: boolean;
 }
 
 export interface StartCheckoutResponse extends PaymentSummary {
