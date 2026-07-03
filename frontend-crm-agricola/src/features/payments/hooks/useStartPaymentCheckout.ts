@@ -7,7 +7,10 @@ interface UseStartPaymentCheckoutResult {
   checkout: StartCheckoutResponse | null;
   isStartingCheckout: boolean;
   error: string | null;
-  startCheckout: (orderId: string) => Promise<StartCheckoutResponse>;
+  startCheckout: (
+    orderId: string,
+    acceptedExternalPaymentConsent: boolean
+  ) => Promise<StartCheckoutResponse>;
   resetError: () => void;
 }
 
@@ -20,27 +23,33 @@ export function useStartPaymentCheckout(): UseStartPaymentCheckoutResult {
     setError(null);
   }, []);
 
-  const startCheckout = useCallback(async (orderId: string): Promise<StartCheckoutResponse> => {
-    setIsStartingCheckout(true);
-    setError(null);
-    setCheckout(null);
+  const startCheckout = useCallback(
+    async (
+      orderId: string,
+      acceptedExternalPaymentConsent: boolean
+    ): Promise<StartCheckoutResponse> => {
+      setIsStartingCheckout(true);
+      setError(null);
+      setCheckout(null);
 
-    try {
-      const data = await startPaymentCheckout(orderId);
-      setCheckout(data);
-      return data;
-    } catch (requestError: unknown) {
-      const message =
-        requestError instanceof Error
-          ? requestError.message
-          : 'No se pudo iniciar el checkout de Mercado Pago.';
+      try {
+        const data = await startPaymentCheckout(orderId, acceptedExternalPaymentConsent);
+        setCheckout(data);
+        return data;
+      } catch (requestError: unknown) {
+        const message =
+          requestError instanceof Error
+            ? requestError.message
+            : 'No se pudo iniciar el checkout de Mercado Pago.';
 
-      setError(message);
-      throw requestError;
-    } finally {
-      setIsStartingCheckout(false);
-    }
-  }, []);
+        setError(message);
+        throw requestError;
+      } finally {
+        setIsStartingCheckout(false);
+      }
+    },
+    []
+  );
 
   return {
     checkout,

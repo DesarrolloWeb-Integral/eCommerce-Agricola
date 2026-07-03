@@ -8,6 +8,8 @@ export interface CrearPagoInput {
   clientId: string
   producerProfileId: string
   subtotal: number
+  proveedorExterno: string
+  consentimientoExternoVersion: string
   consentimientoExternoAceptadoEn: Date
   creadoEn?: Date
 }
@@ -35,6 +37,8 @@ export class PagoFactory {
       EstadoPago.PENDIENTE,
       null,
       null,
+      input.proveedorExterno,
+      input.consentimientoExternoVersion,
       input.consentimientoExternoAceptadoEn,
       creadoEn,
       creadoEn

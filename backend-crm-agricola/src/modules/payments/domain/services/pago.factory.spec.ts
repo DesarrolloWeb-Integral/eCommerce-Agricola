@@ -12,6 +12,8 @@ describe('PagoFactory', () => {
       clientId: 'cliente-id',
       producerProfileId: 'perfil-productor-id',
       subtotal: 100,
+      proveedorExterno: 'MERCADO_PAGO',
+      consentimientoExternoVersion: 'MERCADO_PAGO_TRANSFER_V1',
       consentimientoExternoAceptadoEn: new Date('2026-07-01T10:00:00.000Z'),
       creadoEn: new Date('2026-07-01T10:00:00.000Z'),
     })
@@ -23,6 +25,8 @@ describe('PagoFactory', () => {
     expect(pago.estado).toBe(EstadoPago.PENDIENTE)
     expect(pago.mercadoPagoPreferenceId).toBeNull()
     expect(pago.mercadoPagoPaymentId).toBeNull()
+    expect(pago.proveedorExterno).toBe('MERCADO_PAGO')
+    expect(pago.consentimientoExternoVersion).toBe('MERCADO_PAGO_TRANSFER_V1')
   })
 
   it('debe rechazar un subtotal inválido', () => {
@@ -32,6 +36,8 @@ describe('PagoFactory', () => {
         pedidoId: 'pedido-id',
         clientId: 'cliente-id',
         producerProfileId: 'perfil-productor-id',
+        proveedorExterno: 'MERCADO_PAGO',
+        consentimientoExternoVersion: 'MERCADO_PAGO_TRANSFER_V1',
         consentimientoExternoAceptadoEn: new Date('2026-07-01T10:00:00.000Z'),
         subtotal: 0,
       })

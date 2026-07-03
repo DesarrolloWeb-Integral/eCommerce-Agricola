@@ -39,7 +39,7 @@ export function PaymentCheckoutPanel({ orderId, onClose }: PaymentCheckoutPanelP
     }
 
     try {
-      const checkout = await startCheckout(orderId);
+      const checkout = await startCheckout(orderId, hasAcceptedConsent);
       window.location.assign(checkout.checkoutUrl);
     } catch {
       // El mensaje de error se muestra mediante checkoutError.
