@@ -17,6 +17,8 @@ import { MisProductosPage, CatalogoProductosPage } from '../../features/products
 import { CreateOrderPage, MyOrdersPage, OrdersForMyProductsPage } from '../../features/orders';
 import { AppShell } from '../../shared/components/layout/AppShell';
 import { AuditLogsPage } from '../../features/audit';
+import { AccountPage } from '../../features/account';
+import { PrivacyNoticePage } from '../../features/legal';
 
 export function AppRoutes() {
   return (
@@ -25,6 +27,15 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
       </Route>
+
+      <Route
+        path="/aviso-privacidad"
+        element={
+          <AppShell>
+            <PrivacyNoticePage />
+          </AppShell>
+        }
+      />
 
       {/* Vista pública de productor — sin login */}
       <Route
@@ -38,6 +49,8 @@ export function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardRedirect />} />
+
+        <Route path="/dashboard/mi-cuenta" element={<AccountPage />} />
 
         <Route path="/dashboard/cliente" element={<ClientDashboardPage />} />
 

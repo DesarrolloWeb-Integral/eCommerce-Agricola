@@ -4,9 +4,10 @@ export interface RegisterUserData {
   name: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone: string | null;
   password: string;
   role: UserRole;
+  privacyNoticeAccepted: boolean;
 }
 
 export interface RegisterUserResponse {
