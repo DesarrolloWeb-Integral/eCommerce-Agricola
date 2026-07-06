@@ -59,6 +59,14 @@ export class ProducerProfileService {
     return this.toPrivateDto(saved)
   }
 
+  async findOwnSafe(requestingUserId: string): Promise<{ id: string } | null> {
+    const profile = await this.profileRepository.findOne({
+      where: { userId: requestingUserId },
+    })
+
+    return profile ? { id: profile.id } : null
+  }
+
   async findOwn(requestingUserId: string): Promise<PrivateProducerProfileDto> {
     const profile = await this.profileRepository.findOne({
       where: { userId: requestingUserId },

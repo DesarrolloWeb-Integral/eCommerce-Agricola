@@ -195,6 +195,18 @@ export function ClientDashboardPage() {
               onSelect={() => navigate('/dashboard/cliente/pedidos')}
             />
           </div>
+
+          <div className="col-12 col-md-6">
+            <DashboardActionCard
+              icon="bi-chat-dots"
+              title="Mis conversaciones"
+              eyebrow="Comunícate con productores."
+              description="Envía y responde mensajes relacionados con productos o pedidos."
+              buttonLabel="Ver conversaciones"
+              buttonIcon="bi-chat-left-text"
+              onSelect={() => navigate('/dashboard/cliente/chat')}
+            />
+          </div>
         </div>
       </section>
 
