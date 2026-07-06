@@ -1,5 +1,9 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import type { ProductoDetalle } from '../types/producto.types';
 import { CATEGORIA_LABELS } from '../types/producto.types';
+import { chatService } from '../../chat';
 
 interface ProductDetailModalProps {
   detalle: ProductoDetalle | null;
@@ -14,6 +18,40 @@ export function ProductDetailModal({
   onClose,
   onViewProducer,
 }: ProductDetailModalProps) {
+  const navigate = useNavigate();
+
+  const [mostrarFormularioContacto, setMostrarFormularioContacto] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [errorContacto, setErrorContacto] = useState<string | null>(null);
+
+  async function handleEnviarMensaje(): Promise<void> {
+    if (!detalle) return;
+
+    const contenido = mensaje.trim();
+    if (!contenido) {
+      setErrorContacto('Escribe un mensaje antes de enviar.');
+      return;
+    }
+
+    setEnviando(true);
+    setErrorContacto(null);
+
+    try {
+      await chatService.iniciarConversacion({
+        producerProfileId: detalle.producerProfileId,
+        productoId: detalle.id,
+        mensaje: contenido,
+      });
+
+      navigate('/dashboard/cliente/chat');
+    } catch {
+      setErrorContacto('No se pudo iniciar la conversacion. Intenta de nuevo.');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
   return (
     <>
       <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true">
@@ -67,7 +105,7 @@ export function ProductDetailModal({
                                     detalle.disponible ? 'text-bg-success' : 'text-bg-danger'
                                   }`}
                                 >
-                                  {detalle.disponible ? 'Sí' : 'No'}
+                                  {detalle.disponible ? 'SÃ' : 'No'}
                                 </span>
                               </td>
                             </tr>
@@ -112,12 +150,69 @@ export function ProductDetailModal({
 
                           <button
                             type="button"
-                            className="btn btn-outline-success btn-sm w-100"
+                            className="btn btn-outline-success btn-sm w-100 mb-2"
                             onClick={() => onViewProducer(detalle.productor.id)}
                           >
                             <i className="bi bi-person-lines-fill me-2" aria-hidden="true" />
                             Ver perfil del productor
                           </button>
+
+                          {!mostrarFormularioContacto ? (
+                            <button
+                              type="button"
+                              className="btn btn-success btn-sm w-100"
+                              onClick={() => setMostrarFormularioContacto(true)}
+                            >
+                              <i className="bi bi-chat-dots me-2" aria-hidden="true" />
+                              Contactar productor
+                            </button>
+                          ) : (
+                            <div className="mt-3 pt-3 border-top">
+                              <label
+                                htmlFor="mensajeContacto"
+                                className="form-label small fw-semibold"
+                              >
+                                Escribe tu mensaje
+                              </label>
+                              <textarea
+                                id="mensajeContacto"
+                                className="form-control form-control-sm mb-2"
+                                rows={3}
+                                maxLength={2000}
+                                value={mensaje}
+                                onChange={(e) => setMensaje(e.target.value)}
+                                placeholder="Hola, tengo una pregunta sobre este producto..."
+                                disabled={enviando}
+                              />
+
+                              {errorContacto && (
+                                <p className="text-danger small mb-2">{errorContacto}</p>
+                              )}
+
+                              <div className="d-flex gap-2">
+                                <button
+                                  type="button"
+                                  className="btn btn-success btn-sm flex-grow-1"
+                                  onClick={handleEnviarMensaje}
+                                  disabled={enviando}
+                                >
+                                  {enviando ? 'Enviando...' : 'Enviar mensaje'}
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-secondary btn-sm"
+                                  onClick={() => {
+                                    setMostrarFormularioContacto(false);
+                                    setMensaje('');
+                                    setErrorContacto(null);
+                                  }}
+                                  disabled={enviando}
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </aside>
                     </div>

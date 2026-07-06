@@ -58,6 +58,20 @@ export function ProviderDashboardPage() {
               onSelect={() => navigate('/dashboard/proveedor/pedidos')}
             />
           </div>
+
+          <div className="row g-4">
+            <div className="col-12 col-md-6 col-xl-4">
+              <DashboardActionCard
+                icon="bi-chat-dots"
+                title="Conversaciones"
+                eyebrow="Comunicación con clientes."
+                description="Responde mensajes de clientes sobre tus productos y pedidos."
+                buttonLabel="Ver conversaciones"
+                buttonIcon="bi-chat-left-text"
+                onSelect={() => navigate('/dashboard/proveedor/chat')}
+              />
+            </div>
+          </div>
         </div>
       </section>
     </main>

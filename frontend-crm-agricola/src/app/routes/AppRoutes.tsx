@@ -17,6 +17,7 @@ import { MisProductosPage, CatalogoProductosPage } from '../../features/products
 import { CreateOrderPage, MyOrdersPage, OrdersForMyProductsPage } from '../../features/orders';
 import { AppShell } from '../../shared/components/layout/AppShell';
 import { AuditLogsPage } from '../../features/audit';
+import { ChatPage } from '../../features/chat';
 
 export function AppRoutes() {
   return (
@@ -56,10 +57,12 @@ export function AppRoutes() {
 
         <Route element={<RoleRoute allowedRoles={['CLIENTE']} />}>
           <Route path="/dashboard/cliente/pedidos/nuevo" element={<CreateOrderPage />} />
+          <Route path="/dashboard/cliente/chat" element={<ChatPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['PROVEEDOR']} />}>
           <Route path="/dashboard/proveedor/pedidos" element={<OrdersForMyProductsPage />} />
+          <Route path="/dashboard/proveedor/chat" element={<ChatPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['ADMINISTRADOR']} />}>
