@@ -8,6 +8,9 @@ import type {
   MercadoPagoCheckoutPort,
 } from '../../../ports/out/mercado-pago-checkout.port'
 
+const LOCAL_CALLBACK_HOSTS = new Set(['localhost', '127.0.0.1', '0.0.0.0'])
+const RESERVED_CALLBACK_HOSTS = new Set([...LOCAL_CALLBACK_HOSTS, 'servidor'])
+
 @Injectable()
 export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
   private readonly preference: Preference
@@ -16,7 +19,7 @@ export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
   constructor(private readonly configService: ConfigService) {
     const accessToken = this.getRequiredConfig('MERCADO_PAGO_ACCESS_TOKEN')
 
-    this.webhookUrl = this.getRequiredConfig('MERCADO_PAGO_WEBHOOK_URL')
+    this.webhookUrl = this.getRequiredCallbackUrl('MERCADO_PAGO_WEBHOOK_URL')
 
     const client = new MercadoPagoConfig({
       accessToken,
@@ -54,7 +57,9 @@ export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
         },
       })
 
-      if (!preference.id || !preference.sandbox_init_point) {
+      const checkoutUrl = preference.sandbox_init_point
+
+      if (!preference.id || !checkoutUrl || !this.isHttpsUrl(checkoutUrl)) {
         throw new Error(
           'Mercado Pago no devolvio la informacion necesaria para iniciar el checkout.'
         )
@@ -62,7 +67,7 @@ export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
 
       return {
         preferenceId: preference.id,
-        checkoutUrl: preference.sandbox_init_point,
+        checkoutUrl,
       }
     } catch (error) {
       throw new InternalServerErrorException('No fue posible crear el checkout de Mercado Pago.', {
@@ -81,6 +86,18 @@ export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
     return value
   }
 
+  private getRequiredCallbackUrl(key: string): string {
+    const value = this.getRequiredConfig(key)
+
+    if (!this.isAllowedThirdPartyCallbackUrl(value)) {
+      throw new Error(
+        `La variable ${key} debe ser una URL HTTPS publica. Solo se permite loopback en desarrollo local.`
+      )
+    }
+
+    return value
+  }
+
   private getBackUrls(): { success: string; failure: string; pending: string } | null {
     const success = this.configService.get<string>('MERCADO_PAGO_SUCCESS_URL')?.trim()
     const failure = this.configService.get<string>('MERCADO_PAGO_FAILURE_URL')?.trim()
@@ -90,7 +107,7 @@ export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
       return null
     }
 
-    if (![success, failure, pending].every((url) => this.isPublicHttpsUrl(url))) {
+    if (![success, failure, pending].every((url) => this.isAllowedThirdPartyCallbackUrl(url))) {
       return null
     }
 
@@ -101,12 +118,31 @@ export class MercadoPagoCheckoutAdapter implements MercadoPagoCheckoutPort {
     }
   }
 
-  private isPublicHttpsUrl(value: string): boolean {
+  private isAllowedThirdPartyCallbackUrl(value: string): boolean {
     try {
       const url = new URL(value)
-      const invalidHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', 'servidor'])
 
-      return url.protocol === 'https:' && !invalidHosts.has(url.hostname)
+      if (url.protocol === 'https:' && !RESERVED_CALLBACK_HOSTS.has(url.hostname)) {
+        return true
+      }
+
+      return this.isLocalDevelopmentCallbackUrl(url)
+    } catch {
+      return false
+    }
+  }
+
+  private isLocalDevelopmentCallbackUrl(url: URL): boolean {
+    return (
+      process.env.NODE_ENV !== 'production' &&
+      url.protocol === 'http:' &&
+      LOCAL_CALLBACK_HOSTS.has(url.hostname)
+    )
+  }
+
+  private isHttpsUrl(value: string): boolean {
+    try {
+      return new URL(value).protocol === 'https:'
     } catch {
       return false
     }

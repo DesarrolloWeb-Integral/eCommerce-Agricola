@@ -8,9 +8,12 @@ export function getPaymentSummary(orderId: string): Promise<PaymentSummary> {
   });
 }
 
-export function startPaymentCheckout(orderId: string): Promise<StartCheckoutResponse> {
+export function startPaymentCheckout(
+  orderId: string,
+  acceptedExternalPaymentConsent: boolean
+): Promise<StartCheckoutResponse> {
   const body: StartCheckoutRequest = {
-    acceptedExternalPaymentConsent: true,
+    acceptedExternalPaymentConsent,
   };
 
   return apiClient<StartCheckoutResponse>(

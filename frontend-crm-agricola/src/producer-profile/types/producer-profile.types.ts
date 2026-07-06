@@ -16,6 +16,7 @@ export interface PublicProducerProfile {
   contactPhone: string | null;
   contactEmail: string | null;
   socialLinks: SocialLinks;
+  isAvailable: boolean;
   createdAt: string;
   updatedAt: string;
 }

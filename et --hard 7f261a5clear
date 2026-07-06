@@ -1,0 +1,77 @@
+[33mc66d1f2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrespaldo-conflicto-rutas[m[33m)[m fix: resolver conflicto en rutas de la aplicacion
+[33mba4d48e[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #51 from DesarrolloWeb-Integral/develop
+[33m56fbb36[m[33m ([m[1;31morigin/develop[m[33m)[m Merge pull request #50 from DesarrolloWeb-Integral/feat/rnf04-audit
+[33m5947eac[m[33m ([m[1;31morigin/feat/rnf04-audit[m[33m)[m feat(rnf04): registro auditorias pedidos
+[33m82d7554[m feat(rnf04): registro auditorias productos
+[33m552b3cf[m Merge branch 'main' of https://github.com/DesarrolloWeb-Integral/eCommerce-Agricola into feat/rnf04-audit
+[33mab6dd89[m feat(rnf04): registro auditorias
+[33mb26d409[m feat(rnf04): registro auditorias
+[33m8365ac0[m[33m ([m[1;32mmain[m[33m)[m Merge pull request #49 from DesarrolloWeb-Integral/develop
+[33m7f261a5[m Merge pull request #48 from DesarrolloWeb-Integral/feat/rf-09-desarrollo-funcionalidades-ARCO-y-cancelacion-cuenta
+[33m0f9a29e[m[33m ([m[1;31morigin/feat/rf-09-desarrollo-funcionalidades-ARCO-y-cancelacion-cuenta[m[33m, [m[1;32mfeat/rf-09-desarrollo-funcionalidades-ARCO-y-cancelacion-cuenta[m[33m)[m feat(privacidad): implementar derechos ARCO y cancelación de cuenta
+[33m50d73db[m[33m ([m[1;32mfeat/rf-09-desarrollo-funcionalidades-ARCO-y-cancelación-cuenta[m[33m)[m Merge pull request #47 from DesarrolloWeb-Integral/develop
+[33m101eaee[m[33m ([m[1;32mdevelop[m[33m)[m Merge pull request #46 from DesarrolloWeb-Integral/feat/rf-08-desarrollo-modulo-pago-simulado-comision
+[33mfd08ef4[m[33m ([m[1;31morigin/feat/rf-08-desarrollo-modulo-pago-simulado-comision[m[33m, [m[1;32mfeat/rf-08-desarrollo-modulo-pago-simulado-comision[m[33m)[m fix(ci): evitar error al imprimir datos del pull request
+[33mffaa48e[m feat(pagos): completar integración de checkout, webhook y confirmación automática
+[33m9dc233c[m feat(pagos): implementar pagos simulados con Mercado Pago Sandbox y comisión
+[33ma4fe879[m Merge pull request #45 from DesarrolloWeb-Integral/develop
+[33md177acd[m[33m ([m[1;31morigin/feat/rf-07-desarrollo-modulo-pedidos[m[33m, [m[1;31morigin/feat/rf-07-desarrollo-modulo-pedido-carrito[m[33m, [m[1;32mfeat/rf-07-desarrollo-modulo-pedidos[m[33m, [m[1;32mfeat/rf-07-desarrollo-modulo-pedido-carrito[m[33m, [m[1;32mfeat/mejora-diseño-pantallas[m[33m)[m Merge pull request #44 from DesarrolloWeb-Integral/feat/mejora-diseño-pantallas
+[33m54bf21f[m[33m ([m[1;31morigin/feat/mejora-diseño-pantallas[m[33m)[m fix(diseño): mejora de diseño en pantallas
+[33m3b70a57[m chore: integrar cambios de develop en módulo de pedidos
+[33m9ae085b[m feat(pedidos): implementar módulo de pedidos y carrito
+[33m4d7339b[m Merge pull request #42 from DesarrolloWeb-Integral/develop
+[33md4b8208[m Merge pull request #41 from DesarrolloWeb-Integral/feat/rnf03-ProteccionDatos
+[33mfec60bc[m[33m ([m[1;31morigin/feat/rnf03-ProteccionDatos[m[33m)[m feat(rnf03): unico objeto que debe salir hacia el cliente
+[33mcee8ed7[m Merge pull request #40 from DesarrolloWeb-Integral/develop
+[33m01a4a4a[m Merge pull request #39 from DesarrolloWeb-Integral/feat/rf-10-validacion-minimizacion-datos-formularios
+[33m05f360f[m[33m ([m[1;31morigin/feat/rf-10-validacion-minimizacion-datos-formularios[m[33m, [m[1;32mfeat/rf-10-validacion-minimizacion-datos-formularios[m[33m)[m fix(validation): reforzar validaciones de formularios y backend
+[33m162400e[m fix(rf06): mostrar productos en venta
+[33m8a6ee94[m[33m ([m[1;32mfeat/rf-10-validacion-minimizacion-datos-formulariosclear[m[33m)[m Merge pull request #38 from DesarrolloWeb-Integral/develop
+[33m73b8b9c[m Merge pull request #37 from DesarrolloWeb-Integral/feat/06-Catalogo-productos
+[33m7765da1[m Merge pull request #36 from DesarrolloWeb-Integral/develop
+[33m5d4a744[m[33m ([m[1;31morigin/feat/06-Catalogo-productos[m[33m)[m feat(rf06): desarrollo del catalogo y busqueda de productos
+[33m2724de8[m Merge pull request #35 from DesarrolloWeb-Integral/feat/rf-05-productos
+[33m61c60cb[m[33m ([m[1;31morigin/feat/rf-05-productos[m[33m)[m fix(rf05): se solucionaron errores de risgtro en las tablas y de front
+[33m764a06a[m feat(rf05): modulo de administracion de productos agricolas
+[33meb491cd[m Merge pull request #34 from DesarrolloWeb-Integral/develop
+[33m5162180[m Merge pull request #33 from DesarrolloWeb-Integral/feat/rf-04-Perfiles
+[33m909eace[m Merge pull request #32 from DesarrolloWeb-Integral/develop
+[33mcd9fa54[m[33m ([m[1;31morigin/feat/rf-04-Perfiles[m[33m)[m feat(rf04): rq04 añadido completo
+[33m371fa32[m Merge branch 'main' into develop
+[33md849881[m Merge branch 'develop' of https://github.com/DesarrolloWeb-Integral/eCommerce-Agricola into develop
+[33m5f8fe22[m feat(rf04): modulo de perfil de productor
+[33mfc52372[m Merge pull request #31 from DesarrolloWeb-Integral/feat/rf-02-inicio-y-cierre-sesión
+[33md59d204[m[33m ([m[1;31morigin/feat/rf-02-inicio-y-cierre-sesión[m[33m)[m Merge branch 'develop' into feat/rf-02-inicio-y-cierre-sesión
+[33m6c7640f[m feat(auth): implementar inicio y cierre de sesión
+[33m7f1f4b3[m merge: develop
+[33md11bf44[m Merge pull request #30 from DesarrolloWeb-Integral/fix/auth-registro-aviso-privacidad
+[33m94068ac[m Merge pull request #29 from DesarrolloWeb-Integral/IsaacCanoH-patch-1
+[33m405afb9[m[33m ([m[1;31morigin/fix/auth-registro-aviso-privacidad[m[33m, [m[1;32mfix/auth-registro-aviso-privacidad[m[33m)[m fix: corregir registro con aviso de privacidad
+[33md1a1827[m[33m ([m[1;31morigin/IsaacCanoH-patch-1[m[33m)[m Create README.md with project details and setup
+[33m8d58f39[m Merge pull request #28 from DesarrolloWeb-Integral/develop
+[33m82ff69e[m Merge pull request #27 from DesarrolloWeb-Integral/feat/rf-03-aviso_privacidad
+[33m099c8a0[m[33m ([m[1;31morigin/feat/rf-03-aviso_privacidad[m[33m)[m feat: aviso de privacidad en el formulario de registro
+[33me2499f5[m merge: fusionar main en develop
+[33m228f138[m Merge pull request #26 from DesarrolloWeb-Integral/develop
+[33m911a3c8[m merge: fusionar main en develop
+[33m0bbeecb[m merge: fusionar main en develop
+[33mf8e9482[m Merge pull request #25 from DesarrolloWeb-Integral/feat/rf-01-registro-usuarios
+[33ma5007c9[m[33m ([m[1;31morigin/feat/rf-01-registro-usuarios[m[33m, [m[1;32mfeat/rf-01-registro-usuarios[m[33m)[m feat(auth): implementar registro de usuarios
+[33m2c5a1ac[m Merge pull request #24 from DesarrolloWeb-Integral/feature/setup-postgresql-typeorm
+[33m5936a76[m[33m ([m[1;31morigin/feature/setup-postgresql-typeorm[m[33m)[m Merge branch 'develop' into feature/setup-postgresql-typeorm
+[33m1472c78[m[33m ([m[1;32mfeature/setup-postgresql-typeorm[m[33m)[m feat: configuración PostgreSQL y TypeORM
+[33mfe0bf8e[m Merge pull request #23 from DesarrolloWeb-Integral/chore/estructura-completa
+[33m1ff19d7[m[33m ([m[1;31morigin/chore/estructura-completa[m[33m, [m[1;32mchore/estructura-completa[m[33m)[m chore: estructura completa
+[33m6d5f169[m[33m ([m[1;32mrespaldo-estructura-completa[m[33m)[m feat: probar eslint
+[33m9604c0a[m PullRquest.yml
+[33m6ff8223[m My first push con mensaje en el workflow Gael Quintana Romero
+[33me66dd4e[m Enhance workflow output with commit details
+[33mccf2016[m My first push con mensaje en el workflow Gael Quintana Romero
+[33mfc255fa[m First Push Editado
+[33m1f20e4e[m My first push
+[33m398b6d4[m First Push
+[33m484783e[m Pwd
+[33m5997363[m Mensaje con WorkFlow
+[33mda1b71d[m Se arreglo error de imágenes mal importadas en App.tsx y se corrgio el main.ts del backend
+[33m3d5c939[m feat: configuración inicial del proyecto
+[33me72757a[m chore: estructura inicial de backend y frontend

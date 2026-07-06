@@ -151,7 +151,8 @@ export class UsuariosController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.CLIENTE, RolUsuario.PROVEEDOR, RolUsuario.ADMINISTRADOR)
   async editar(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() editarUsuarioDto: EditarUsuarioDto,
@@ -175,7 +176,8 @@ export class UsuariosController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.CLIENTE, RolUsuario.PROVEEDOR, RolUsuario.ADMINISTRADOR)
   @HttpCode(HttpStatus.OK)
   async desactivar(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,

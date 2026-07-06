@@ -22,6 +22,9 @@ import {
 } from '../../ports/out/pedido-consulta-pago.port'
 import { EstadoPedido } from '../../../pedidos/domain/value-objects/estado-pedido.enum'
 
+const MERCADO_PAGO_PROVIDER = 'MERCADO_PAGO'
+const MERCADO_PAGO_TRANSFER_CONSENT_VERSION = 'MERCADO_PAGO_TRANSFER_V1'
+
 export interface IniciarCheckoutPagoInput {
   pedidoId: string
   clientId: string
@@ -94,6 +97,8 @@ export class IniciarCheckoutPagoUseCase {
       clientId: pedido.clientId,
       producerProfileId: pedido.producerProfileId,
       subtotal: pedido.subtotal,
+      proveedorExterno: MERCADO_PAGO_PROVIDER,
+      consentimientoExternoVersion: MERCADO_PAGO_TRANSFER_CONSENT_VERSION,
       consentimientoExternoAceptadoEn: new Date(),
     })
   }

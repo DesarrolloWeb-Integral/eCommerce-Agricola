@@ -12,6 +12,7 @@ interface LoginLocationState {
   from?: {
     pathname: string;
   };
+  message?: string;
 }
 
 export function LoginPage() {
@@ -22,6 +23,7 @@ export function LoginPage() {
 
   const locationState = location.state as LoginLocationState | null;
   const redirectPath = locationState?.from?.pathname ?? '/dashboard';
+  const sessionMessage = locationState?.message ?? null;
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -105,6 +107,14 @@ export function LoginPage() {
 
                       <form onSubmit={handleSubmit(onSubmit)} noValidate>
                         <div className="row g-4">
+                          {sessionMessage && (
+                            <div className="col-12">
+                              <div className="alert alert-success mb-0" role="status">
+                                {sessionMessage}
+                              </div>
+                            </div>
+                          )}
+
                           <div className="col-12">
                             <label htmlFor="email" className="form-label fw-semibold">
                               Correo electrónico <span className="text-danger">*</span>
