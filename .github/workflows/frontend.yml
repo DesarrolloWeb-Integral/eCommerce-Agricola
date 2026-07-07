@@ -12,12 +12,12 @@ on:
       - main
       - develop
     paths:
-      - "front/**"
+      - "frontend-crm-agricola/**"
 
 # Define que todos los comandos 'run' se ejecuten dentro de la carpeta del frontend
 defaults:
   run:
-    working-directory: ./front 
+    working-directory: ./frontend-crm-agricola 
 
 jobs:
   validar:
