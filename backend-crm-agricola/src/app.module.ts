@@ -34,6 +34,9 @@ import { APP_GUARD } from '@nestjs/core'
       database: process.env.DB_NAME,
       username: process.env.DB_USERNAME,
       password: process.env.BD_PASSWORD,
+      ssl: {
+        rejectUnauthorized: false,
+      },
       autoLoadEntities: true,
       synchronize: true,
     }),
