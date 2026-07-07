@@ -29,9 +29,16 @@ export async function refreshTokens(): Promise<boolean> {
 }
 
 async function refreshAccessTokens(): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    clearTokens();
+
+    return false;
+  }
+
   try {
     const response = await fetch(`${API_URL}/auth/refresh`, {
       method: 'POST',
+      cache: 'no-store',
       credentials: 'include',
     });
 
