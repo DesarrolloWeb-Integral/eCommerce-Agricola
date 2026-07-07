@@ -45,8 +45,13 @@ export async function apiClient<TResponse>(
 
   requestHeaders.set('Content-Type', 'application/json');
 
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new Error('No hay conexion a Internet. Revisa tu red e intenta nuevamente.');
+  }
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...requestOptions,
+    cache: 'no-store',
     credentials: 'include',
     headers: requestHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
