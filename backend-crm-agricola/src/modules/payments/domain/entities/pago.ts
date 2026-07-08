@@ -13,6 +13,8 @@ export class Pago {
     public estado: EstadoPago,
     public mercadoPagoPreferenceId: string | null,
     public mercadoPagoPaymentId: string | null,
+    public readonly proveedorExterno: string,
+    public readonly consentimientoExternoVersion: string,
     public readonly consentimientoExternoAceptadoEn: Date,
     public readonly creadoEn: Date,
     public actualizadoEn: Date

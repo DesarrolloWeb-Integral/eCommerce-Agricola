@@ -3,7 +3,7 @@ export interface UserProfile {
   name: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone: string | null;
   role: string;
   isActive: boolean;
   createdAt: string;

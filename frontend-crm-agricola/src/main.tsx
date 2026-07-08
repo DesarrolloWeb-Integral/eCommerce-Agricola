@@ -7,15 +7,21 @@ import App from './app/App.tsx';
 import { ToastProvider } from './shared/providers/ToastProvider.tsx';
 import { AuthProvider } from './features/auth/providers/AuthProvider';
 import { BrowserRouter } from 'react-router-dom';
+import { ConnectivityProvider } from './shared/providers/ConnectivityProvider.tsx';
+import { registerServiceWorker } from './pwa/registerServiceWorker.ts';
+
+registerServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </ToastProvider>
+      <ConnectivityProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </ToastProvider>
+      </ConnectivityProvider>
     </BrowserRouter>
   </StrictMode>
 );

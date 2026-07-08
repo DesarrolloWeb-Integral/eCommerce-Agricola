@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { clearTokens } from '../../../services';
+import { useConnectivity } from '../../../shared/hooks/useConnectivity';
 import { AuthContext } from '../contexts/AuthContext';
 import { getAuthenticatedUser, logoutUser, refreshAccessToken } from '../services';
 import type { AuthenticatedUser } from '../types';
@@ -10,15 +11,25 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const { isOnline } = useConnectivity();
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(isOnline);
 
   useEffect(() => {
     let isCurrentRequest = true;
 
     async function restoreSession(): Promise<void> {
       clearTokens();
+
+      if (!isOnline) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsInitializing(false);
+        return;
+      }
+
+      setIsInitializing(true);
 
       try {
         await refreshAccessToken();
@@ -51,7 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isCurrentRequest = false;
     };
-  }, []);
+  }, [isOnline]);
 
   async function loginSession(): Promise<AuthenticatedUser> {
     try {

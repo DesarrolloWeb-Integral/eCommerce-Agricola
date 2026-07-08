@@ -15,8 +15,8 @@ interface RegisterUserFormProps {
 
 export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
   const navigate = useNavigate();
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
-  const [showPrivacyError, setShowPrivacyError] = useState(false);
+  const [privacyNoticeAccepted, setPrivacyNoticeAccepted] = useState(false);
+  const [showConsentError, setShowConsentError] = useState(false);
 
   const {
     register,
@@ -26,24 +26,30 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
   } = useForm<RegisterUserData>({ mode: 'onTouched' });
 
   async function onSubmit(data: RegisterUserData): Promise<void> {
-    if (!privacyAccepted) {
-      setShowPrivacyError(true);
+    if (!privacyNoticeAccepted) {
+      setShowConsentError(true);
       return;
     }
 
-    const wasRegistered = await onRegister(data);
+    const phone = typeof data.phone === 'string' ? data.phone.trim() : '';
+
+    const wasRegistered = await onRegister({
+      ...data,
+      phone: phone.length > 0 ? phone : null,
+      privacyNoticeAccepted,
+    });
 
     if (wasRegistered) {
       reset();
-      setPrivacyAccepted(false);
-      setShowPrivacyError(false);
+      setPrivacyNoticeAccepted(false);
+      setShowConsentError(false);
     }
   }
 
   function handleCancel(): void {
     reset();
-    setPrivacyAccepted(false);
-    setShowPrivacyError(false);
+    setPrivacyNoticeAccepted(false);
+    setShowConsentError(false);
     navigate('/login');
   }
 
@@ -147,7 +153,7 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
 
         <div className="col-12 col-md-6">
           <label htmlFor="phone" className="form-label fw-semibold">
-            Teléfono <span className="text-danger">*</span>
+            Teléfono <span className="text-secondary fw-normal">(opcional)</span>
           </label>
           <div className="input-group">
             <span className="input-group-text bg-light">
@@ -162,11 +168,10 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               maxLength={10}
               autoComplete="tel"
               {...register('phone', {
-                required: 'El teléfono es obligatorio.',
-                pattern: {
-                  value: /^\d{10}$/,
-                  message: 'El teléfono debe tener exactamente 10 dígitos.',
-                },
+                validate: (value) =>
+                  !value ||
+                  /^\d{10}$/.test(value) ||
+                  'El teléfono debe tener exactamente 10 dígitos.',
               })}
             />
           </div>
@@ -235,11 +240,11 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
         {/* ── Aviso de Privacidad ── */}
         <div className="col-12">
           <PrivacyConsentSection
-            accepted={privacyAccepted}
-            showError={showPrivacyError}
+            accepted={privacyNoticeAccepted}
+            showError={showConsentError}
             onConsentChange={(accepted) => {
-              setPrivacyAccepted(accepted);
-              if (accepted) setShowPrivacyError(false);
+              setPrivacyNoticeAccepted(accepted);
+              if (accepted) setShowConsentError(false);
             }}
           />
         </div>
@@ -256,7 +261,11 @@ export function RegisterUserForm({ onRegister }: RegisterUserFormProps) {
               Cancelar
             </button>
 
-            <button type="submit" className="btn btn-success px-4" disabled={isSubmitting}>
+            <button
+              type="submit"
+              className="btn btn-success px-4"
+              disabled={isSubmitting || !privacyNoticeAccepted}
+            >
               {isSubmitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
