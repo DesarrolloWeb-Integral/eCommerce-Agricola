@@ -1,0 +1,51 @@
+name: CI Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend-crm-agricola/**"
+      - ".github/workflows/ci-frontend.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "frontend-crm-agricola/**"
+      - ".github/workflows/ci-frontend.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-checks:
+    name: Frontend Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: frontend-crm-agricola
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend-crm-agricola/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar lint
+        run: npm run lint
+
+      - name: Compilar frontend
+        run: npm run build

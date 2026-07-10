@@ -1,0 +1,48 @@
+name: CI Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend-crm-agricola/**"
+      - ".github/workflows/ci-backend.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend-crm-agricola/**"
+      - ".github/workflows/ci-backend.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-checks:
+    name: Backend Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: backend-crm-agricola
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend-crm-agricola/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar backend
+        run: npm run build
