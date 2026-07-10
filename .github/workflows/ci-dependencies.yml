@@ -1,0 +1,66 @@
+name: CI Dependencies
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend-crm-agricola/package.json"
+      - "frontend-crm-agricola/package-lock.json"
+      - "backend-crm-agricola/package.json"
+      - "backend-crm-agricola/package-lock.json"
+      - ".github/workflows/ci-dependencies.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "frontend-crm-agricola/package.json"
+      - "frontend-crm-agricola/package-lock.json"
+      - "backend-crm-agricola/package.json"
+      - "backend-crm-agricola/package-lock.json"
+      - ".github/workflows/ci-dependencies.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-dependencies:
+    name: Dependencies - ${{ matrix.project }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: Frontend
+            directory: frontend-crm-agricola
+            lockfile: frontend-crm-agricola/package-lock.json
+
+          - project: Backend
+            directory: backend-crm-agricola
+            lockfile: backend-crm-agricola/package-lock.json
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ${{ matrix.lockfile }}
+
+      - name: Validar archivos package.json y package-lock.json
+        run: npm ci --ignore-scripts
+
+      - name: Mostrar dependencias instaladas
+        run: npm list --depth=0
