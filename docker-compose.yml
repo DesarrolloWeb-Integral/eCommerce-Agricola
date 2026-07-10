@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-AgroDB}
+      POSTGRES_USER: ${DB_USERNAME:-agro_user}
+      POSTGRES_PASSWORD: ${BD_PASSWORD:-agro_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend-crm-agricola
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend-crm-agricola/.env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-AgroDB}
+      DB_USERNAME: ${DB_USERNAME:-agro_user}
+      BD_PASSWORD: ${BD_PASSWORD:-agro_password}
+      DB_SSL: "false"
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:3000}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      PAYMENT_PLATFORM_COMMISSION_PERCENTAGE: ${PAYMENT_PLATFORM_COMMISSION_PERCENTAGE:-10}
+      ACCOUNT_CANCELLATION_JOB_ENABLED: ${ACCOUNT_CANCELLATION_JOB_ENABLED:-false}
+      ACCOUNT_CANCELLATION_JOB_INTERVAL_MS: ${ACCOUNT_CANCELLATION_JOB_INTERVAL_MS:-3600000}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend-crm-agricola
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
