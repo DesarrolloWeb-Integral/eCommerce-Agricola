@@ -11,6 +11,46 @@ Proyecto web agricola con dos aplicaciones:
 - `backend-crm-agricola`: API con NestJS, TypeORM y PostgreSQL.
 - `frontend-crm-agricola`: cliente web con React, Vite y Bootstrap.
 
+## Ejecutar todo con Docker
+
+El archivo `docker-compose.yml` de la raiz inicia PostgreSQL, backend y frontend.
+Docker Compose usa valores locales predeterminados. Para personalizarlos, copia
+`.env.example` como `.env` en esta misma carpeta y edita sus valores.
+Las credenciales de integraciones privadas, como Mercado Pago, se cargan desde
+`backend-crm-agricola/.env`.
+
+Desde la carpeta raiz del proyecto ejecuta:
+
+```bash
+docker compose up --build
+```
+
+La aplicacion queda disponible en:
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3000`
+- PostgreSQL: disponible internamente para el backend como `postgres:5432`
+
+Para iniciarla en segundo plano:
+
+```bash
+docker compose up --build -d
+```
+
+Para detener los contenedores sin borrar los datos:
+
+```bash
+docker compose down
+```
+
+Para detenerlos y borrar tambien el volumen de PostgreSQL:
+
+```bash
+docker compose down -v
+```
+
+> El ultimo comando elimina los datos locales de la base de datos.
+
 ## Requisitos
 
 - Node.js y npm

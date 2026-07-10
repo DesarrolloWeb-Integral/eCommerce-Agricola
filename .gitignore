@@ -2,3 +2,5 @@ node_modules/
 .husky/
 .vercel
 .env*
+!.env.example
+!.env.template
