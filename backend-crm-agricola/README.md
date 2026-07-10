@@ -96,3 +96,110 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Arquitectura del proyecto
+
+Este backend sigue una **arquitectura hexagonal (ports & adapters)**, organizada por módulos de dominio (`auth`, `usuarios`, `productos`, `pedidos`, `payments`, `chat`, etc.). Cada módulo se divide en tres capas:
+
+- **`domain/`** — entidades y lógica de negocio pura, sin dependencias de frameworks ni de TypeORM.
+- **`application/`** — casos de uso (use-cases) que orquestan el dominio y dependen únicamente de _ports_ (interfaces), nunca de implementaciones concretas.
+- **`adapters/`** — implementaciones concretas de entrada (`in/http`, controladores) y salida (`out/persistence`, `out/mercado-pago`, etc.).
+- **`ports/out/`** — interfaces (contratos) que el dominio/aplicación define y que los adapters implementan.
+
+Esta separación permite que la lógica de negocio no dependa directamente de TypeORM, de Express, ni de ningún proveedor externo (Mercado Pago, etc.) — todo se conecta mediante inyección de dependencias en los `*.module.ts`.
+
+### Repository Pattern
+
+Cada entidad principal (productos, pedidos, usuarios, pagos, perfiles de productor) define un **port** con la interfaz de persistencia que necesita el dominio, y un **adapter** que la implementa usando TypeORM. Los use-cases dependen solo del port.
+
+**Ejemplo — módulo de productos:**
+
+```typescript
+// ports/out/producto-repository.port.ts
+export interface ProductoRepositoryPort {
+  findById(id: string): Promise<Producto | null>
+  searchByNombre(nombre: string): Promise<Producto[]>
+  reservarStock(id: string, quantity: number): Promise<boolean>
+  // ...
+}
+
+// adapters/out/persistence/typeorm/repositories/typeorm-producto.repository.ts
+@Injectable()
+export class TypeormProductoRepository implements ProductoRepositoryPort {
+  constructor(
+    @InjectRepository(ProductoEntity)
+    private readonly repo: Repository<ProductoEntity>
+  ) {}
+  // implementación con QueryBuilder parametrizado
+}
+```
+
+El mismo patrón se repite en `pedidos` (`PedidoRepositoryPort` / `TypeormPedidoRepository`), `usuarios`, `pagos` y `chat`. Gracias a esto, la lógica de negocio en los use-cases nunca importa `Repository<Entity>` de TypeORM directamente — solo el símbolo del port vía `@Inject(PRODUCTO_REPOSITORY_PORT)`.
+
+### Strategy Pattern
+
+El cálculo de comisiones sobre pagos usa Strategy Pattern para desacoplar el algoritmo de cálculo de comisión de la lógica que crea un pago.
+
+**Interfaz (`domain/strategies/comision.strategy.ts`):**
+
+```typescript
+export const COMISION_STRATEGY = Symbol('COMISION_STRATEGY')
+
+export interface ComisionStrategy {
+  calcular(subtotal: number): number
+}
+```
+
+**Implementación concreta (`domain/strategies/comision-porcentaje-fijo.strategy.ts`):**
+
+```typescript
+export class ComisionPorcentajeFijoStrategy implements ComisionStrategy {
+  constructor(private readonly porcentaje: number) {
+    /* ... */
+  }
+  calcular(subtotal: number): number {
+    /* ... */
+  }
+}
+```
+
+**Consumidor (`domain/services/pago.factory.ts`):** depende únicamente de la interfaz, nunca de la implementación concreta:
+
+```typescript
+export class PagoFactory {
+  constructor(private readonly comisionStrategy: ComisionStrategy) {}
+
+  crear(input: CrearPagoInput): Pago {
+    const comision = this.comisionStrategy.calcular(input.subtotal)
+    // ...
+  }
+}
+```
+
+**Resolución en el módulo (`pagos-comisiones.module.ts`):** la estrategia concreta se decide en un único punto mediante un factory provider, configurable por variable de entorno:
+
+```typescript
+{
+  provide: COMISION_STRATEGY,
+  inject: [ConfigService],
+  useFactory: (configService: ConfigService): ComisionStrategy => {
+    const porcentaje = Number(configService.get<string>('PAYMENT_PLATFORM_COMMISSION_PERCENTAGE'))
+    return new ComisionPorcentajeFijoStrategy(porcentaje)
+  },
+}
+```
+
+Esto permite agregar nuevas estrategias de comisión (por ejemplo, escalonada por volumen o diferenciada por categoría de producto) creando una nueva clase que implemente `ComisionStrategy`, sin modificar `PagoFactory` ni ningún use-case que la consuma.
+
+### Convenciones adicionales
+
+- **Controladores delgados**: los controladores (`*.controller.ts`) solo mapean request → DTO → use-case → response. Nunca contienen reglas de negocio, validaciones complejas ni acceso directo a la base de datos.
+- **Comunicación exclusivamente JSON**: todos los endpoints consumen y producen `application/json`. El frontend (React + Vite) se comunica con el backend únicamente vía `fetch`/JSON, sin XML ni form-data.
+- **Códigos de estado HTTP**: se usan de forma consistente en toda la API:
+  - `200 OK` — operaciones de lectura o actualización exitosas.
+  - `201 Created` — creación de recursos (pedidos, productos, conversaciones, etc.).
+  - `400 Bad Request` — validación de DTO fallida (`class-validator`).
+  - `401 Unauthorized` — falta de autenticación (JWT ausente o inválido).
+  - `403 Forbidden` — autenticado pero sin permiso sobre el recurso (BOLA prevention).
+  - `404 Not Found` — recurso inexistente.
+  - `500 Internal Server Error` — manejado por el filtro de excepciones global de NestJS para errores no controlados.
